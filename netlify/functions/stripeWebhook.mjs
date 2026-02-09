@@ -1,7 +1,7 @@
 // Netlify Function - Stripe Webhook Handler
 import Stripe from 'stripe';
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, serverTimestamp } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -93,7 +93,7 @@ async function handleCheckoutCompleted(session) {
       paymentStatus: 'paid',
       status: 'confirmed',
       stripeSessionId: session.id,
-      updatedAt: serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp()
     });
 
     // Increment capacity for the booking date
@@ -129,7 +129,7 @@ async function handleCheckoutExpired(session) {
     // Update booking to expired status
     await db.collection('bookings').doc(bookingId).update({
       status: 'expired',
-      updatedAt: serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp()
     });
 
     console.log(`Booking ${bookingId} marked as expired due to payment timeout`);
@@ -157,7 +157,7 @@ async function incrementCapacity(date, serviceType) {
       transaction.set(capacityRef, {
         ...currentData,
         [field]: newValue,
-        updatedAt: serverTimestamp()
+        updatedAt: FieldValue.serverTimestamp()
       }, { merge: true });
     });
     
