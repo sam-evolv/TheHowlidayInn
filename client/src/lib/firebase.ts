@@ -137,17 +137,14 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
 
 export const resetPassword = async (email: string) => {
   const normalizedEmail = email.trim().toLowerCase();
-
-  const configuredResetUrl = import.meta.env.VITE_PASSWORD_RESET_REDIRECT_URL;
-  const fallbackResetUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/login`
-      : `https://${cfg.authDomain}/login`;
-
-  return await sendPasswordResetEmail(auth, normalizedEmail, {
-    url: configuredResetUrl || fallbackResetUrl,
-    handleCodeInApp: false,
+  const response = await fetch("/.netlify/functions/requestPasswordReset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: normalizedEmail }),
   });
+  if (!response.ok) {
+    throw new Error("Failed to request password reset");
+  }
 };
 
 // User functions
