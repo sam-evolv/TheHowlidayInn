@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Howliday Inn - Premium Dog Daycare & Boarding in Cork</title>
+    <meta name="description" content="Premium dog daycare and boarding services in Kilgarvan, Curraghbinny, Carrigaline, Co. Cork. Licensed, insured, and dedicated to your furry family member's happiness.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar transparent" id="navbar">
+        <div class="nav-content">
+            <div>
+                <img src="assets/logo.png" alt="The Howliday Inn" class="nav-logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="login.html" class="btn btn-primary">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-video-container">
+            <video 
+                id="hero-video" 
+                class="hero-video" 
+                autoplay 
+                muted 
+                loop 
+                playsinline
+                poster="assets/hero-poster.jpg"
+            >
+                <source src="assets/hero-video.mp4" type="video/mp4">
+                <source src="assets/hero-video.webm" type="video/webm">
+            </video>
+            <img src="assets/hero-poster.jpg" alt="Happy dogs playing" class="hero-bg-fallback" loading="lazy">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content fade-in">
+            <h1 class="hero-title">Welcome to The Howliday Inn</h1>
+            <p class="hero-subtitle">Premium daycare and boarding for your beloved furry family members in beautiful Cork</p>
+            <div class="btn-group">
+                <a href="daycare.html" class="btn btn-primary btn-large">Book Daycare</a>
+                <a href="boarding.html" class="btn btn-secondary btn-large">Book Boarding</a>
+                <a href="login.html" class="btn btn-outline btn-large">My Account</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section fade-in-section">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>About The Howliday Inn</h2>
+                <p>Located in the heart of Kilgarvan, Curraghbinny, Carrigaline, Co. Cork, we provide premium care for your four-legged family members. Our passion is ensuring every dog feels loved, safe, and happy during their stay with us.</p>
+            </div>
+            <div class="card-grid">
+                <div class="card hover-lift">
+                    <h3>Licensed & Insured</h3>
+                    <p>Fully licensed and insured facility with experienced, trained staff who genuinely love dogs. We maintain the highest standards of care and safety.</p>
+                </div>
+                <div class="card hover-lift">
+                    <h3>Safe Environment</h3>
+                    <p>Secure, clean, and spacious facilities designed specifically for your dog's comfort and safety. All areas are regularly sanitized and maintained.</p>
+                </div>
+                <div class="card hover-lift">
+                    <h3>Personalized Care</h3>
+                    <p>Individual attention and care tailored to your dog's specific needs, personality, and preferences. Every dog gets the love they deserve.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Things to Know Section -->
+    <section id="things-to-know" class="section" style="background: var(--gray-50);">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Things to Know</h2>
+                <p>Important information for a smooth experience at The Howliday Inn.</p>
+            </div>
+            <div class="rules-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
+                <div class="card">
+                    <h3>📋 Vaccination Requirements</h3>
+                    <ul class="requirements-list">
+                        <li>✅ Up-to-date rabies vaccination</li>
+                        <li>✅ DHPP (distemper, hepatitis, parvovirus, parainfluenza)</li>
+                        <li>✅ Bordetella (kennel cough)</li>
+                        <li>✅ Vaccination records must be provided at booking</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🕒 Operating Hours</h3>
+                    <ul class="requirements-list">
+                        <li><strong>Daycare Drop-off:</strong> 8:00 AM - 10:00 AM</li>
+                        <li><strong>Daycare Pick-up:</strong> 4:00 PM - 6:00 PM</li>
+                        <li><strong>Boarding Check-in:</strong> 8:00 AM - 6:00 PM</li>
+                        <li><strong>Boarding Check-out:</strong> 8:00 AM - 6:00 PM</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>🚫 Breed Restrictions</h3>
+                    <p style="margin-bottom: 1rem;">For safety and insurance purposes, we have restrictions on certain breeds. Our system will check your dog's breed during booking.</p>
+                    <p><small>If your dog's breed is restricted, we'll provide information about specialized facilities.</small></p>
+                </div>
+                <div class="card">
+                    <h3>📝 Booking Policies</h3>
+                    <ul class="requirements-list">
+                        <li>🔄 24-hour cancellation policy</li>
+                        <li>💳 Payment required at booking</li>
+                        <li>📞 Emergency contact information required</li>
+                        <li>🐕 Trial day required for first-time customers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="section" style="background: var(--gray-50);">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Our Services</h2>
+                <p>Professional care services designed to keep your dog happy, healthy, and socialized.</p>
+            </div>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Daycare</h3>
+                    <p>Full-day supervised play and socialization with drop-off and pick-up times that work with your schedule.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Morning drop-off: 8:00-10:00 AM</li>
+                        <li>Evening pick-up: 4:00-6:00 PM</li>
+                        <li>Supervised play sessions</li>
+                        <li>Feeding and medication administration</li>
+                    </ul>
+                    <a href="daycare.html" class="btn btn-primary">Book Daycare</a>
+                </div>
+                <div class="card">
+                    <h3>Boarding</h3>
+                    <p>Overnight boarding in comfortable, clean accommodations with plenty of attention and exercise.</p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Comfortable sleeping areas</li>
+                        <li>Regular walks and exercise</li>
+                        <li>Feeding and medication administration</li>
+                        <li>Daily photo updates</li>
+                    </ul>
+                    <a href="boarding.html" class="btn btn-secondary">Book Boarding</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section fade-in-section">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Happy Dogs Gallery</h2>
+                <p>See some of our wonderful guests enjoying their time at The Howliday Inn.</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item" onclick="openLightbox(0)">
+                    <img src="assets/placeholder-1.jpg" alt="Happy dogs playing" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(1)">
+                    <img src="assets/placeholder-2.jpg" alt="Dogs relaxing" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(2)">
+                    <img src="assets/placeholder-3.jpg" alt="Dog getting attention" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(3)">
+                    <img src="assets/placeholder-4.jpg" alt="Dogs playing together" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(4)">
+                    <img src="assets/placeholder-5.jpg" alt="Comfortable sleeping area" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(5)">
+                    <img src="assets/placeholder-6.jpg" alt="Exercise and training" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="gallery-icon">🔍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+            <img id="lightbox-image" src="" alt="">
+            <div class="lightbox-nav">
+                <button class="lightbox-prev" onclick="previousImage()">❮</button>
+                <button class="lightbox-next" onclick="nextImage()">❯</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section" style="background: var(--gray-50);">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-container" style="max-width: 800px; margin: 0 auto;">
+                <div class="faq-item" style="margin-bottom: 1rem;">
+                    <button class="faq-question" style="width: 100%; text-align: left; padding: 1rem; background: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">
+                        What vaccination requirements do you have?
+                    </button>
+                    <div class="faq-answer" style="padding: 1rem; background: white; margin-top: 0.25rem; border-radius: 0.5rem; display: none;">
+                        <p>All dogs must be up-to-date on their core vaccinations including rabies, DHPP (distemper, hepatitis, parvovirus, parainfluenza), and bordetella. We require vaccination records to be provided during booking.</p>
+                    </div>
+                </div>
+                <div class="faq-item" style="margin-bottom: 1rem;">
+                    <button class="faq-question" style="width: 100%; text-align: left; padding: 1rem; background: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">
+                        What should I bring for my dog?
+                    </button>
+                    <div class="faq-answer" style="padding: 1rem; background: white; margin-top: 0.25rem; border-radius: 0.5rem; display: none;">
+                        <p>Just bring your dog! We provide food, water, toys, and bedding. However, you're welcome to bring your dog's favorite toy or blanket for comfort.</p>
+                    </div>
+                </div>
+                <div class="faq-item" style="margin-bottom: 1rem;">
+                    <button class="faq-question" style="width: 100%; text-align: left; padding: 1rem; background: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">
+                        Do you accept all dog breeds?
+                    </button>
+                    <div class="faq-answer" style="padding: 1rem; background: white; margin-top: 0.25rem; border-radius: 0.5rem; display: none;">
+                        <p>We welcome most dog breeds, but we do have restrictions on certain breeds for safety and insurance reasons. Please check during booking to ensure your dog's breed is accepted.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2>Contact Us</h2>
+                <p>Get in touch to learn more or book your dog's stay.</p>
+            </div>
+            <div class="card-grid">
+                <div class="card text-center">
+                    <h3>Location</h3>
+                    <p>Kilgarvan, Curraghbinny<br>Carrigaline, Co. Cork</p>
+                </div>
+                <div class="card text-center">
+                    <h3>Phone</h3>
+                    <p><a href="tel:+353555123456">+353 555 123 456</a></p>
+                </div>
+                <div class="card text-center">
+                    <h3>Email</h3>
+                    <p><a href="mailto:bookings@thehowlidayinn.ie">bookings@thehowlidayinn.ie</a></p>
+                </div>
+            </div>
+            <div class="text-center" style="margin-top: 3rem;">
+                <a href="booking.html" class="btn btn-primary btn-large">Book Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <img src="assets/logo.png" alt="The Howliday Inn" class="footer-logo">
+                <p style="color: var(--gray-300); margin-bottom: 1rem;">
+                    Premium daycare and boarding services for your beloved furry family members. 
+                    Licensed, insured, and dedicated to providing the best care possible.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="daycare.html">Daycare</a></li>
+                    <li><a href="boarding.html">Boarding</a></li>
+                    <li><a href="booking.html">Book Now</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Account</h4>
+                <ul>
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="account.html">My Account</a></li>
+                    <li><a href="booking.html">Book Services</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Kilgarvan, Curraghbinny</li>
+                    <li>Carrigaline, Co. Cork</li>
+                    <li><a href="tel:+353555123456">+353 555 123 456</a></li>
+                    <li><a href="mailto:bookings@thehowlidayinn.ie">bookings@thehowlidayinn.ie</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--gray-600);">
+            <p style="color: var(--gray-400);">© 2024 The Howliday Inn. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.remove('transparent');
+                navbar.classList.add('solid');
+            } else {
+                navbar.classList.remove('solid');
+                navbar.classList.add('transparent');
+            }
+        });
+
+        // FAQ accordion
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const isOpen = answer.style.display === 'block';
+                
+                // Close all answers
+                document.querySelectorAll('.faq-answer').forEach(a => {
+                    a.style.display = 'none';
+                });
+                
+                // Toggle current answer
+                if (!isOpen) {
+                    answer.style.display = 'block';
+                }
+            });
+        });
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Gallery lightbox functionality
+        const galleryImages = [
+            { src: 'assets/placeholder-1.jpg', alt: 'Happy dogs playing in our secure outdoor area' },
+            { src: 'assets/placeholder-2.jpg', alt: 'Dogs relaxing in comfortable rest areas' },
+            { src: 'assets/placeholder-3.jpg', alt: 'Individual attention and care for every dog' },
+            { src: 'assets/placeholder-4.jpg', alt: 'Dogs playing together during socialization time' },
+            { src: 'assets/placeholder-5.jpg', alt: 'Comfortable sleeping areas for boarding guests' },
+            { src: 'assets/placeholder-6.jpg', alt: 'Exercise and training activities' }
+        ];
+
+        let currentImageIndex = 0;
+
+        window.openLightbox = function(index) {
+            currentImageIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const image = document.getElementById('lightbox-image');
+            
+            image.src = galleryImages[index].src;
+            image.alt = galleryImages[index].alt;
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeLightbox = function() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        window.nextImage = function() {
+            currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+            const image = document.getElementById('lightbox-image');
+            image.src = galleryImages[currentImageIndex].src;
+            image.alt = galleryImages[currentImageIndex].alt;
+        };
+
+        window.previousImage = function() {
+            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+            const image = document.getElementById('lightbox-image');
+            image.src = galleryImages[currentImageIndex].src;
+            image.alt = galleryImages[currentImageIndex].alt;
+        };
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections with fade-in-section class
+        document.querySelectorAll('.fade-in-section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Hero video fallback
+        const heroVideo = document.getElementById('hero-video');
+        if (heroVideo) {
+            heroVideo.addEventListener('error', () => {
+                heroVideo.style.display = 'none';
+                document.querySelector('.hero-bg-fallback').style.display = 'block';
+            });
+        }
+
+        // Keyboard navigation for lightbox
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.style.display === 'flex') {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    previousImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

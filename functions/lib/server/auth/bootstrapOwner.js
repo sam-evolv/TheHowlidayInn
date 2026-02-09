@@ -1,0 +1,27 @@
+import argon2 from "argon2";
+import { getOwner, upsertOwner } from "../services/userService";
+export async function ensureOwnerExists() {
+    const existing = await getOwner();
+    if (existing && existing.passwordHash) {
+        // Owner already exists with password
+        return;
+    }
+    const email = process.env.OWNER_EMAIL?.trim();
+    const name = process.env.OWNER_NAME?.trim() || "Owner";
+    const tempPass = process.env.OWNER_PASSWORD?.trim();
+    if (!email || !tempPass) {
+        console.warn("[auth] No owner present and OWNER_EMAIL/OWNER_PASSWORD not set. Admin will be locked.");
+        return;
+    }
+    const hash = await argon2.hash(tempPass, { type: argon2.argon2id });
+    await upsertOwner({
+        id: "owner",
+        email,
+        name,
+        role: "owner",
+        passwordHash: hash,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    });
+    console.log("[auth] Bootstrapped owner account:", email);
+}

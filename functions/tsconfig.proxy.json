@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib"
+  },
+  "include": ["src/index.ts", "src/proxy.ts"],
+  "exclude": ["src/server/**/*"]
+}

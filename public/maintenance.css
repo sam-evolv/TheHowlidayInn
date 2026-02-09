@@ -1,0 +1,139 @@
+:root {
+  /* The Howliday Inn brand colors */
+  --hi-charcoal: #1A1614;
+  --hi-cream: #FAF8F4;
+  --hi-brown: #2D1F16;
+  --hi-gold: #C9A66B;
+  --hi-beige: #E8D5C4;
+  
+  /* Maintenance page theme */
+  --brand-bg: var(--hi-charcoal);
+  --brand-accent: var(--hi-gold);
+  --card-bg: rgba(250, 248, 244, 0.06);
+  --text: var(--hi-cream);
+  --muted: #B8AFA6;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --brand-bg: var(--hi-cream);
+    --text: var(--hi-brown);
+    --muted: #5A4A3D;
+    --card-bg: rgba(26, 22, 20, 0.04);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--brand-bg);
+  color: var(--text);
+  font: 16px/1.6 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(40% 60% at 20% 20%, rgba(201, 166, 107, 0.25), transparent 60%),
+    radial-gradient(40% 60% at 80% 70%, rgba(201, 166, 107, 0.18), transparent 60%);
+  animation: float 12s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(6px); }
+}
+
+.wrap {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 6vmin;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  width: min(720px, 92vw);
+  padding: 32px 32px 24px;
+  border-radius: 16px;
+  -webkit-backdrop-filter: saturate(150%) blur(10px);
+  backdrop-filter: saturate(150%) blur(10px);
+  background-color: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  width: min(280px, 65vw);
+  height: auto;
+  margin: 8px auto 20px;
+  display: block;
+  animation: pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.02); }
+}
+
+h1 {
+  margin: 0.2rem 0 0.6rem;
+  font-size: clamp(24px, 5vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.lead {
+  margin: 0.1rem 0 1.4rem;
+  color: var(--muted);
+  font-size: clamp(15px, 3.2vw, 18px);
+  line-height: 1.5;
+}
+
+.contact {
+  padding: 16px;
+  background: rgba(201, 166, 107, 0.1);
+  border-radius: 8px;
+  margin: 1.2rem 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.contact a {
+  color: var(--brand-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s;
+}
+
+.contact a:hover {
+  opacity: 0.8;
+}
+
+footer {
+  margin-top: 1.4rem;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 24px 20px 20px;
+  }
+  
+  .contact {
+    font-size: 14px;
+    padding: 12px;
+  }
+}

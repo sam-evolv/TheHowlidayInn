@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - The Howliday Inn</title>
+    <meta name="description" content="Sign in to your Howliday Inn account to manage bookings and dog profiles.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar solid">
+        <div class="nav-content">
+            <div>
+                <a href="index.html">
+                    <img src="assets/logo.png" alt="The Howliday Inn" class="nav-logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="booking.html">Book Now</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 6rem; padding-bottom: 4rem;">
+        <div style="max-width: 400px; margin: 0 auto;">
+            <div class="card">
+                <div class="text-center mb-4">
+                    <h1>Welcome Back</h1>
+                    <p style="color: var(--gray-600);">Sign in to manage your bookings and dog profiles</p>
+                </div>
+
+                <!-- Sign In Form -->
+                <form id="signInForm" style="display: block;">
+                    <div class="form-group">
+                        <label for="signInEmail" class="form-label">Email</label>
+                        <input type="email" id="signInEmail" class="form-input" required>
+                        <div id="signInEmailError" class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signInPassword" class="form-label">Password</label>
+                        <input type="password" id="signInPassword" class="form-input" required>
+                        <div id="signInPasswordError" class="form-error"></div>
+                    </div>
+                    
+                    <button type="submit" id="signInBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                        Sign In
+                    </button>
+                    
+                    <div id="signInError" class="form-error"></div>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form id="signUpForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="signUpName" class="form-label">Full Name</label>
+                        <input type="text" id="signUpName" class="form-input" required>
+                        <div id="signUpNameError" class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signUpEmail" class="form-label">Email</label>
+                        <input type="email" id="signUpEmail" class="form-input" required>
+                        <div id="signUpEmailError" class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signUpPhone" class="form-label">Phone</label>
+                        <input type="tel" id="signUpPhone" class="form-input" required>
+                        <div id="signUpPhoneError" class="form-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signUpPassword" class="form-label">Password</label>
+                        <input type="password" id="signUpPassword" class="form-input" required>
+                        <small style="color: var(--gray-600);">Minimum 6 characters</small>
+                        <div id="signUpPasswordError" class="form-error"></div>
+                    </div>
+                    
+                    <button type="submit" id="signUpBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                        Create Account
+                    </button>
+                    
+                    <div id="signUpError" class="form-error"></div>
+                </form>
+
+                <!-- Toggle between forms -->
+                <div class="text-center">
+                    <button id="toggleToSignUp" class="btn btn-outline" style="display: block;">
+                        Don't have an account? Sign Up
+                    </button>
+                    <button id="toggleToSignIn" class="btn btn-outline" style="display: none;">
+                        Already have an account? Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: 0.5rem; text-align: center;">
+            <div class="loading" style="margin-bottom: 1rem;"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 1rem; right: 1rem; z-index: 1001;"></div>
+
+    <script type="module">
+        import { initAuth, signIn, signUp, getCurrentUser, redirectAfterAuth } from './js/auth.js';
+
+        // Initialize
+        let isSignUpMode = false;
+
+        // DOM elements
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+        const toggleToSignUp = document.getElementById('toggleToSignUp');
+        const toggleToSignIn = document.getElementById('toggleToSignIn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Initialize authentication
+        initAuth().then(user => {
+            if (user) {
+                // User already logged in, redirect
+                redirectAfterAuth(user);
+            }
+        }).catch(error => {
+            console.error('Auth initialization error:', error);
+        });
+
+        // Form toggle
+        toggleToSignUp.addEventListener('click', () => {
+            isSignUpMode = true;
+            signInForm.style.display = 'none';
+            signUpForm.style.display = 'block';
+            toggleToSignUp.style.display = 'none';
+            toggleToSignIn.style.display = 'block';
+            clearErrors();
+        });
+
+        toggleToSignIn.addEventListener('click', () => {
+            isSignUpMode = false;
+            signUpForm.style.display = 'none';
+            signInForm.style.display = 'block';
+            toggleToSignIn.style.display = 'none';
+            toggleToSignUp.style.display = 'block';
+            clearErrors();
+        });
+
+        // Sign In Form
+        signInForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
+            
+            clearErrors();
+            showLoading(true);
+            
+            try {
+                const user = await signIn(email, password);
+                showToast('Welcome back! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    redirectAfterAuth(user);
+                }, 1000);
+                
+            } catch (error) {
+                showError('signInError', error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Sign Up Form
+        signUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('signUpName').value;
+            const email = document.getElementById('signUpEmail').value;
+            const phone = document.getElementById('signUpPhone').value;
+            const password = document.getElementById('signUpPassword').value;
+            
+            clearErrors();
+            
+            // Basic validation
+            if (password.length < 6) {
+                showError('signUpPasswordError', 'Password must be at least 6 characters');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const user = await signUp(email, password, name, phone);
+                showToast('Account created successfully! Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    redirectAfterAuth(user);
+                }, 1000);
+                
+            } catch (error) {
+                showError('signUpError', error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Helper functions
+        function clearErrors() {
+            document.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+            });
+        }
+
+        function showError(elementId, message) {
+            document.getElementById(elementId).textContent = message;
+        }
+
+        function showLoading(show) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type} show`;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span style="margin-right: 0.5rem;">${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

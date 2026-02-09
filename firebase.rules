@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function banned() {
+      return [
+        "doberman","doberman pinscher",
+        "german shepherd","german shepherd dog",
+        "rottweiler","rottweilers",
+        "kerry blue","kerry blue terrier",
+        "rhodesian ridgeback","ridgeback",
+        "xl bully","american bully xl","bully xl",
+        "staffordshire bull terrier","staffie","staffy",
+        "pit bull","pitbull","american pit bull terrier",
+        "bull terrier",
+        "bullmastiff",
+        "saint bernard","st bernard","st. bernard",
+        "akita","akita inu"
+      ];
+    }
+    function isBreedAllowed(breed) {
+      return !(breed is string && banned().hasAny([breed.toLowerCase()]));
+    }
+
+    // users doc
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // dogs subcollection
+    match /users/{uid}/dogs/{dogId} {
+      allow create, update, delete: if isOwner(uid) && isBreedAllowed(request.resource.data.breedNorm);
+      allow read: if isOwner(uid);
+    }
+  }
+}

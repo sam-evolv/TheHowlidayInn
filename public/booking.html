@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Service - The Howliday Inn</title>
+    <meta name="description" content="Choose between daycare and boarding services for your dog at The Howliday Inn.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar solid">
+        <div class="nav-content">
+            <div>
+                <a href="index.html">
+                    <img src="assets/logo.png" alt="The Howliday Inn" class="nav-logo">
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="account.html">My Account</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 6rem; padding-bottom: 4rem;">
+        <div class="text-center mb-4">
+            <h1>Choose Your Service</h1>
+            <p style="color: var(--gray-600);">Select the perfect service for your furry friend</p>
+        </div>
+
+        <div class="card-grid" style="max-width: 1000px; margin: 0 auto;">
+            <!-- Daycare Service -->
+            <div class="card text-center" style="cursor: pointer; transition: all 0.3s ease;" onclick="selectService('daycare')">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">☀️</div>
+                <h2 style="color: var(--primary); margin-bottom: 1rem;">Daycare</h2>
+                <p style="margin-bottom: 2rem; color: var(--gray-600);">
+                    Perfect for busy days when you need professional care for your dog. 
+                    Supervised play, socialization, and individual attention.
+                </p>
+                
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">Service Details</h4>
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Drop-off:</strong> 8:00-10:00 AM</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Pick-up:</strong> 4:00-6:00 PM</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Duration:</strong> Full day care</li>
+                        <li style="padding: 0.5rem 0;"><strong>Price:</strong> €35 per day</li>
+                    </ul>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">What's Included</h4>
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li style="padding: 0.25rem 0;">✅ Supervised playtime</li>
+                        <li style="padding: 0.25rem 0;">✅ Socialization with other dogs</li>
+                        <li style="padding: 0.25rem 0;">✅ Feeding and water</li>
+                        <li style="padding: 0.25rem 0;">✅ Individual attention</li>
+                        <li style="padding: 0.25rem 0;">✅ Basic grooming</li>
+                    </ul>
+                </div>
+                
+                <button class="btn btn-primary btn-large" style="width: 100%;">
+                    Book Daycare - €35
+                </button>
+            </div>
+
+            <!-- Boarding Service -->
+            <div class="card text-center" style="cursor: pointer; transition: all 0.3s ease;" onclick="selectService('boarding')">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🌙</div>
+                <h2 style="color: var(--secondary); margin-bottom: 1rem;">Boarding</h2>
+                <p style="margin-bottom: 2rem; color: var(--gray-600);">
+                    Overnight care in comfortable accommodations when you're away. 
+                    Your dog will feel right at home with us.
+                </p>
+                
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">Service Details</h4>
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Check-in:</strong> 8:00-10:00 AM or 4:00-6:00 PM</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Check-out:</strong> 8:00-10:00 AM or 4:00-6:00 PM</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);"><strong>Duration:</strong> Overnight stays</li>
+                        <li style="padding: 0.5rem 0;"><strong>Price:</strong> €55 per night</li>
+                    </ul>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 1rem;">What's Included</h4>
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li style="padding: 0.25rem 0;">✅ Comfortable sleeping area</li>
+                        <li style="padding: 0.25rem 0;">✅ Regular walks and exercise</li>
+                        <li style="padding: 0.25rem 0;">✅ Meals and fresh water</li>
+                        <li style="padding: 0.25rem 0;">✅ Medication administration</li>
+                        <li style="padding: 0.25rem 0;">✅ Daily photo updates</li>
+                        <li style="padding: 0.25rem 0;">✅ 24/7 supervision</li>
+                    </ul>
+                </div>
+                
+                <button class="btn btn-secondary btn-large" style="width: 100%;">
+                    Book Boarding - €55/night
+                </button>
+            </div>
+        </div>
+
+        <!-- Important Information -->
+        <div class="card" style="max-width: 800px; margin: 3rem auto 0; background: var(--gray-50);">
+            <h3 style="margin-bottom: 1.5rem;">Important Requirements</h3>
+            <div style="display: grid; gap: 1rem;">
+                <div style="display: flex; align-items: flex-start;">
+                    <span style="color: var(--primary); margin-right: 0.75rem; font-size: 1.25rem;">💉</span>
+                    <div>
+                        <strong>Vaccinations Required</strong>
+                        <p style="margin: 0.25rem 0 0; color: var(--gray-600);">Up-to-date rabies, DHPP, and bordetella vaccinations must be provided during booking.</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <span style="color: var(--primary); margin-right: 0.75rem; font-size: 1.25rem;">🐕</span>
+                    <div>
+                        <strong>Breed Restrictions</strong>
+                        <p style="margin: 0.25rem 0 0; color: var(--gray-600);">Some dog breeds are restricted for safety and insurance reasons. This will be checked during booking.</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <span style="color: var(--primary); margin-right: 0.75rem; font-size: 1.25rem;">📋</span>
+                    <div>
+                        <strong>Dog Profile Required</strong>
+                        <p style="margin: 0.25rem 0 0; color: var(--gray-600);">You'll need to create a profile for your dog including breed, age, and temperament information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        function selectService(serviceType) {
+            if (serviceType === 'daycare') {
+                window.location.href = 'daycare.html';
+            } else if (serviceType === 'boarding') {
+                window.location.href = 'boarding.html';
+            }
+        }
+
+        // Make function globally available
+        window.selectService = selectService;
+
+        // Add hover effects
+        document.querySelectorAll('.card').forEach(card => {
+            if (card.style.cursor === 'pointer') {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                    card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

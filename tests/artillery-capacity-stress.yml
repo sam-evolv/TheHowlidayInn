@@ -1,0 +1,170 @@
+config:
+  target: "http://localhost:5000"
+  phases:
+    # Warm-up phase: Gradual ramp to understand baseline performance
+    - duration: 30
+      arrivalRate: 2
+      name: "Warm-up: Baseline traffic"
+    
+    # Standard load: Normal business operation
+    - duration: 60
+      arrivalRate: 10
+      name: "Standard load: Normal operations"
+    
+    # Peak load: Simulates high-demand booking periods (e.g., weekend before holidays)
+    - duration: 60
+      arrivalRate: 25
+      name: "Peak load: High-demand period"
+    
+    # Stress test: Intentional overbooking attempt to validate hard limits
+    - duration: 30
+      arrivalRate: 50
+      name: "Stress test: Overbooking prevention"
+    
+  # Load test environment variables
+  variables:
+    capacityDaycare: 40
+    capacityBoarding: 20
+    capacityTrial: 40
+    
+  # Request timeout and other settings
+  timeout: 30
+  
+  # Custom plugins for metrics
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+scenarios:
+  # Scenario 1: Availability check under concurrent load
+  - name: "Check availability"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/availability"
+          beforeRequest: "setAvailabilityDate"
+          afterResponse: "captureAvailability"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: available
+            - hasProperty: capacity
+
+  # Scenario 2: Simple reservation creation (tests atomic capacity check)
+  - name: "Create reservation only"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/reservations"
+          beforeRequest: "generateReservationPayload"
+          json:
+            serviceType: "{{ serviceType }}"
+            date: "{{ bookingDate }}"
+            dogId: "{{ dogId }}"
+            userId: "test-user-{{ $randomNumber(1, 10000) }}"
+          expect:
+            - statusCode: [200, 409, 400]
+          capture:
+            - json: "$.reservationId"
+              as: "reservationId"
+            - json: "$.expiresAt"
+              as: "expiresAt"
+          afterResponse: "logReservationResult"
+
+  # Scenario 3: Full booking flow with payment (most realistic)
+  - name: "Complete booking flow"
+    weight: 35
+    flow:
+      # Step 0: Reset context variables from previous iterations
+      - function: "resetContextVariables"
+      
+      # Step 1: Create reservation
+      - post:
+          url: "/api/reservations"
+          beforeRequest: "generateReservationPayload"
+          json:
+            serviceType: "{{ serviceType }}"
+            date: "{{ bookingDate }}"
+            dogId: "{{ dogId }}"
+            userId: "test-user-{{ $randomNumber(1, 10000) }}"
+          capture:
+            - json: "$.reservationId"
+              as: "reservationId"
+          afterResponse: "logReservationResult"
+          expect:
+            - statusCode: [200, 409]
+      
+      # Step 2: Create payment intent (if reservation succeeded)
+      - post:
+          url: "/api/reservations/{{ reservationId }}/payment-intent"
+          ifTrue: "reservationId"
+          json:
+            amount: 3500
+            currency: "eur"
+          capture:
+            - json: "$.clientSecret"
+              as: "clientSecret"
+          afterResponse: "clearStateOnPaymentIntentFailure"
+          expect:
+            - statusCode: [200, 404]
+      
+      # Step 3: Decide payment outcome (ONLY if reservation succeeded)
+      - function: "decidePaymentOutcome"
+        ifTrue: "reservationId"
+      
+      # Step 4: Simulate user thinking time (ONLY if reservation succeeded)
+      - think: 2
+        ifTrue: "reservationId"
+      
+      # Step 5: Release reservation if user abandons (50% of successful reservations)
+      # Note: Payment completion (webhook) is tested separately since it requires Stripe signatures
+      # For load testing, 50% stay pending (simulating webhook), 50% are released (user abandonment)
+      - post:
+          url: "/api/reservations/{{ reservationId }}/release"
+          ifTrue: "shouldRelease"
+          afterResponse: "trackReleaseResult"
+          expect:
+            - statusCode: [200, 404]
+
+  # Scenario 4: Race condition test - multiple users competing for last spot
+  - name: "Race condition: Last spot"
+    weight: 10
+    flow:
+      # Step 0: Reset context variables from previous iterations
+      - function: "resetContextVariables"
+      
+      # Check current availability for today's daycare
+      - get:
+          url: "/api/availability"
+          beforeRequest: "setTodayDate"
+          capture:
+            - json: "$.available"
+              as: "availableSpots"
+      
+      # Try to reserve if spots available
+      - post:
+          url: "/api/reservations"
+          ifTrue: "availableSpots"
+          json:
+            serviceType: "daycare"
+            date: "{{ todayDate }}"
+            dogId: "race-dog-{{ $randomNumber(1, 1000) }}"
+            userId: "race-user-{{ $randomNumber(1, 1000) }}"
+          expect:
+            - statusCode: [200, 409]
+          capture:
+            - json: "$.reservationId"
+              as: "raceReservationId"
+      
+      # Hold for a moment (simulating user thinking)
+      - think: 1
+      
+      # Release to allow next race
+      - post:
+          url: "/api/reservations/{{ raceReservationId }}/release"
+          ifTrue: "raceReservationId"
+          expect:
+            - statusCode: [200, 404]
+
+# Custom functions for request setup and response validation
+processor: "./tests/artillery-processor.js"

@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User documents
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Dog profiles - enhanced for comprehensive system
+    match /dogs/{dogId} {
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid &&
+        (!('ownerUid' in request.resource.data) || request.resource.data.ownerUid == request.auth.uid) &&
+        // Prevent privilege escalation - only allow safe defaults
+        request.resource.data.status == 'pending' &&
+        !('disallowedReason' in request.resource.data) &&
+        !('nextExpiry' in request.resource.data);
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.ownerUid == request.auth.uid ||
+        request.auth.token.admin == true
+      );
+      allow update: if request.auth != null && (
+        // Admin can update anything
+        request.auth.token.admin == true ||
+        // Non-admin owners can only update non-admin fields
+        ((resource.data.userId == request.auth.uid || resource.data.ownerUid == request.auth.uid) &&
+         // Enforce ownership immutability
+         request.resource.data.userId == resource.data.userId &&
+         // If ownerUid is being set, it must equal userId
+         (!('ownerUid' in request.resource.data) || request.resource.data.ownerUid == request.resource.data.userId) &&
+         // If ownerUid existed before, it must remain unchanged (unless admin)
+         (!('ownerUid' in resource.data) || request.resource.data.ownerUid == resource.data.ownerUid) &&
+         // Admin-only fields must remain unchanged for non-admin updates
+         request.resource.data.status == resource.data.status &&
+         (!('disallowedReason' in request.resource.data) || request.resource.data.disallowedReason == resource.data.disallowedReason) &&
+         (!('nextExpiry' in request.resource.data) || request.resource.data.nextExpiry == resource.data.nextExpiry))
+      );
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Vaccination records
+    match /vaccinations/{vaccinationId} {
+      allow create: if request.auth != null && (
+        exists(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)) &&
+        (get(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)).data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)).data.ownerUid == request.auth.uid) &&
+        // Prevent self-verification
+        request.resource.data.verified == false
+      );
+      allow read, update: if request.auth != null && (
+        // Admin can read/update anything
+        request.auth.token.admin == true ||
+        // Owner can read/update their dog's vaccinations with restrictions
+        (exists(/databases/$(database)/documents/dogs/$(resource.data.dogId)) &&
+         (get(/databases/$(database)/documents/dogs/$(resource.data.dogId)).data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/dogs/$(resource.data.dogId)).data.ownerUid == request.auth.uid) &&
+         // Non-admin cannot change dogId or verified status
+         (request.method == 'get' || 
+          (request.resource.data.dogId == resource.data.dogId &&
+           request.resource.data.verified == resource.data.verified)))
+      );
+      allow delete: if request.auth != null && (
+        (exists(/databases/$(database)/documents/dogs/$(resource.data.dogId)) &&
+         (get(/databases/$(database)/documents/dogs/$(resource.data.dogId)).data.userId == request.auth.uid ||
+          get(/databases/$(database)/documents/dogs/$(resource.data.dogId)).data.ownerUid == request.auth.uid)) ||
+        request.auth.token.admin == true
+      );
+    }
+    
+    // Health profiles
+    match /health_profiles/{dogId} {
+      allow create, read, update: if request.auth != null && (
+        // Owner can manage their dog's health profile (check both userId and ownerUid for compatibility)
+        exists(/databases/$(database)/documents/dogs/$(dogId)) &&
+        (get(/databases/$(database)/documents/dogs/$(dogId)).data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/dogs/$(dogId)).data.ownerUid == request.auth.uid)
+      ) || request.auth.token.admin == true;
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Bookings - secure approach storing under user path
+    match /users/{userId}/bookings/{bookingId} {
+      allow create: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.data.userId == userId &&
+        // Validate dog ownership
+        exists(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)) &&
+        (get(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)).data.userId == userId ||
+         get(/databases/$(database)/documents/dogs/$(request.resource.data.dogId)).data.ownerUid == userId) &&
+        // Prevent privilege escalation - only allow safe defaults
+        request.resource.data.status == 'pending' &&
+        !('stripeSessionId' in request.resource.data);
+      
+      allow read: if request.auth != null && 
+        (request.auth.uid == userId || request.auth.token.admin == true);
+      
+      allow update: if request.auth != null && (
+        request.auth.token.admin == true ||
+        // Non-admin owners can only update limited fields and cancel bookings
+        (request.auth.uid == userId &&
+         request.resource.data.userId == resource.data.userId &&
+         request.resource.data.dogId == resource.data.dogId &&
+         request.resource.data.totalAmount == resource.data.totalAmount &&
+         request.resource.data.currency == resource.data.currency &&
+         (!('stripeSessionId' in request.resource.data) || request.resource.data.stripeSessionId == resource.data.stripeSessionId) &&
+         // Allow cancellation but not other status changes
+         (request.resource.data.status == resource.data.status || 
+          ((resource.data.status == 'pending' || resource.data.status == 'confirmed') && request.resource.data.status == 'cancelled')))
+      );
+      
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Legacy bookings collection (read-only for migration)
+    match /bookings/{bookingId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.ownerUid == request.auth.uid ||
+        request.auth.token.admin == true
+      );
+      allow create, update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Capacity management
+    match /capacity/{date} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // System settings (kennel configuration)
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}
