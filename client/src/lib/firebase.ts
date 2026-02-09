@@ -137,14 +137,7 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
 
 export const resetPassword = async (email: string) => {
   const normalizedEmail = email.trim().toLowerCase();
-  const response = await fetch("/.netlify/functions/requestPasswordReset", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: normalizedEmail }),
-  });
-  if (!response.ok) {
-    throw new Error("Failed to request password reset");
-  }
+  await sendPasswordResetEmail(auth, normalizedEmail);
 };
 
 // User functions
