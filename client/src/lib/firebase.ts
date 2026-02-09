@@ -136,7 +136,18 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
 };
 
 export const resetPassword = async (email: string) => {
-  return await sendPasswordResetEmail(auth, email);
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const configuredResetUrl = import.meta.env.VITE_PASSWORD_RESET_REDIRECT_URL;
+  const fallbackResetUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/login`
+      : `https://${cfg.authDomain}/login`;
+
+  return await sendPasswordResetEmail(auth, normalizedEmail, {
+    url: configuredResetUrl || fallbackResetUrl,
+    handleCodeInApp: false,
+  });
 };
 
 // User functions

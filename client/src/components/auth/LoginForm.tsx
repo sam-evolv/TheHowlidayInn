@@ -16,7 +16,7 @@ const logoImage = "/brand/howliday-logo-light.png";
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -69,8 +69,17 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
         return;
       }
 
+      if (!isForgotPassword && (!data.password || data.password.length < 6)) {
+        form.setError('password', {
+          type: 'manual',
+          message: 'Password must be at least 6 characters',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (isLogin) {
-        await signIn(data.email, data.password);
+        await signIn(data.email, data.password!);
         toast({
           title: "Welcome back! 🐾",
           description: "You're now signed in. Your furry friend will be so happy!",
@@ -83,7 +92,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
           }
         }, 500);
       } else {
-        await signUp(data.email, data.password, "Guest User", "");
+        await signUp(data.email, data.password!, "Guest User", "");
         toast({
           title: "Welcome to The Howliday Inn! 🎉",
           description: "Your account has been created. Let's get started with your profile!",
