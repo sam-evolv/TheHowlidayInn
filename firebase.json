@@ -38,7 +38,7 @@
     ]
   },
   "firestore": {
-    "rules": "config/firestore.rules"
+    "rules": "firebase.rules"
   },
   "storage": {
     "rules": "config/storage.rules"
