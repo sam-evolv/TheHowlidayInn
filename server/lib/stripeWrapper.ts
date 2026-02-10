@@ -2,8 +2,8 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: '2025-08-27.basil' });
 
-// Read once at boot. If set, forces cents for smoke tests.
-const PRICE_OVERRIDE_CENTS = process.env.PRICE_OVERRIDE_CENTS
+// Read once at boot. If set, forces cents for smoke tests (development only).
+const PRICE_OVERRIDE_CENTS = (process.env.NODE_ENV !== 'production' && process.env.PRICE_OVERRIDE_CENTS)
   ? parseInt(process.env.PRICE_OVERRIDE_CENTS, 10)
   : undefined;
 

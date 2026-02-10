@@ -9,11 +9,12 @@ import { createPaymentIntent } from "../lib/stripeWrapper";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { getDailyWindows, isClosed, isWeekend } from "../../shared/hoursPolicy";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
 // POST /api/reservations
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requireAuth, async (req: any, res: Response) => {
   try {
     const validationResult = createReservationSchema.safeParse(req.body);
     
@@ -180,7 +181,7 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // POST /api/reservations/:id/payment-intent
-router.post("/:id/payment-intent", async (req: Request, res: Response) => {
+router.post("/:id/payment-intent", requireAuth, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
     const validationResult = createPaymentIntentSchema.safeParse(req.body);
@@ -263,7 +264,7 @@ router.post("/:id/payment-intent", async (req: Request, res: Response) => {
 });
 
 // POST /api/reservations/:id/release
-router.post("/:id/release", async (req: Request, res: Response) => {
+router.post("/:id/release", requireAuth, async (req: any, res: Response) => {
   try {
     const { id } = req.params;
 
