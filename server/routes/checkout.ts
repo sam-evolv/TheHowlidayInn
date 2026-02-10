@@ -12,7 +12,7 @@ const router = express.Router();
 // - email for receipt_email (optional)
 // - dogAge, phoneNumber, serviceType for metadata (optional, defaults to "n/a")
 // Returns: { clientSecret }
-router.post("/create-intent-by-booking", requireAuth, async (req: any, res) => {
+router.post("/create-intent-by-booking", requireAuth, async (req, res) => {
   try {
     const body = req.body || {};
     const amount = Number.isInteger(body.amount) ? body.amount : 3500;

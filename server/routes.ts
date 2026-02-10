@@ -612,8 +612,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Mark trial as completed for a dog
-  app.post('/api/admin/dogs/:dogId/trial/complete', requireOwnerAuth, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/admin/dogs/:dogId/trial/complete', requireOwnerAuth, async (req, res) => {
     try {
+      const userId = req.session?.userId;
 
       const dog = await storage.getDog(req.params.dogId);
       if (!dog) {
@@ -626,9 +627,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedDog = await storage.updateDog(req.params.dogId, {
         trialRequired: false,
         trialCompletedAt: completedTimestamp,
-        trialCompletedByUserId: null,
+        trialCompletedByUserId: userId || null,
         trialNote: note || null
-      } as any);
+      });
 
       res.json({
         message: 'Trial marked as completed',

@@ -97,7 +97,7 @@ usersRouter.patch("/api/me", requireAuth, async (req: AuthenticatedRequest, res)
 
     await db.update(users).set(updateData).where(eq(users.id, uid));
 
-    console.log("Profile updated for user:", uid, "name:", name, "phone:", phone);
+    console.log("Profile updated for user:", uid, "name:", name);
     res.json({ ok: true, message: "Profile updated successfully" });
   } catch (err: any) {
     console.error("PATCH /api/me error:", err);

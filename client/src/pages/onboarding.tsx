@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from '@/lib/api';
 import { useLocation } from 'wouter';
-import { apiRequest } from '@/lib/queryClient';
 
 export default function Onboarding() {
   const [uid, setUid] = useState<string | undefined>();
@@ -37,18 +37,15 @@ export default function Onboarding() {
 
   const saveOwner = async () => {
     if (!uid) return;
-    // Save to Firestore for legacy compatibility
+    // Save to Firestore for profile-exists check
     await setDoc(doc(db, 'users', uid), {
       uid, name, email, phone, createdAt: Date.now()
     }, { merge: true });
-    // Sync name and phone to PostgreSQL so the profile page and API can read them
+    // Sync name and phone to PostgreSQL so backend has the data
     try {
-      await apiRequest('/api/me', {
-        method: 'PATCH',
-        body: JSON.stringify({ name, phone }),
-      });
+      await api.patch('/api/me', { name, phone });
     } catch (err) {
-      console.error('Failed to sync profile to database:', err);
+      console.error('Failed to sync profile to server:', err);
     }
     setStep('dog');
   };

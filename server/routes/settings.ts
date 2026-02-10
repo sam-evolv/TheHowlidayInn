@@ -1,7 +1,7 @@
 // Settings API routes for serving business configuration data
 import { Router } from "express";
 import { db } from "../db/client";
-import { settings, configSettings, capacityDefaults, capacityOverrides, reservations } from "../db/schema";
+import { settings, configSettings, capacityDefaults, capacityOverrides, reservations, availability } from "../db/schema";
 import { eq, sql, and, lte, gte, or } from "drizzle-orm";
 import { upsertCapacitySchema } from "../../shared/schema";
 import { requireOwnerAuth } from "../auth/session";
@@ -251,7 +251,7 @@ settingsRouter.get("/api/settings/capacity", async (req, res) => {
 });
 
 // POST /api/settings/capacity - Update capacity settings
-settingsRouter.post("/api/settings/capacity", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.post("/api/settings/capacity", requireOwnerAuth, async (req, res) => {
   try {
     const { daycare, boarding, trial } = req.body;
 
@@ -295,29 +295,18 @@ settingsRouter.post("/api/settings/capacity", requireOwnerAuth, async (req: any,
     // Update all current and future availability records to reflect new capacity limits
     const today = new Date().toISOString().split('T')[0];
 
-    // Update availability records for each service - affects today and all future dates
-    // Using parameterized queries to prevent SQL injection
-    const daycareCapacity = String(Number(capacityData.daycare) || 0);
-    const boardingCapacity = String(Number(capacityData.boarding) || 0);
-    const trialCapacity = String(Number(capacityData.trial) || 0);
+    // Update availability records for each service using Drizzle query builder (type-safe, parameterized)
+    await db.update(availability)
+      .set({ capacity: capacityData.daycare, updatedAt: new Date() })
+      .where(and(eq(availability.service, 'Daycare'), gte(availability.date, today), eq(availability.slot, 'ALL_DAY')));
 
-    await db.execute(sql`
-      UPDATE availability
-      SET capacity = ${daycareCapacity}::int, updated_at = now()
-      WHERE service = 'Daycare' AND date >= ${today} AND slot = 'ALL_DAY'
-    `);
+    await db.update(availability)
+      .set({ capacity: capacityData.boarding, updatedAt: new Date() })
+      .where(and(eq(availability.service, 'Boarding'), gte(availability.date, today), eq(availability.slot, 'ALL_DAY')));
 
-    await db.execute(sql`
-      UPDATE availability
-      SET capacity = ${boardingCapacity}::int, updated_at = now()
-      WHERE service = 'Boarding' AND date >= ${today} AND slot = 'ALL_DAY'
-    `);
-
-    await db.execute(sql`
-      UPDATE availability
-      SET capacity = ${trialCapacity}::int, updated_at = now()
-      WHERE service = 'Trial Day' AND date >= ${today} AND slot = 'ALL_DAY'
-    `);
+    await db.update(availability)
+      .set({ capacity: capacityData.trial, updatedAt: new Date() })
+      .where(and(eq(availability.service, 'Trial Day'), gte(availability.date, today), eq(availability.slot, 'ALL_DAY')));
 
     return res.json({
       success: true,
@@ -333,7 +322,7 @@ settingsRouter.post("/api/settings/capacity", requireOwnerAuth, async (req: any,
 });
 
 // PUT /api/capacity/defaults - Update capacity defaults
-settingsRouter.put("/api/capacity/defaults", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.put("/api/capacity/defaults", requireOwnerAuth, async (req, res) => {
   try {
     const { daycare, boardingSmall, boardingLarge, trial } = req.body;
 
@@ -383,7 +372,7 @@ settingsRouter.put("/api/capacity/defaults", requireOwnerAuth, async (req: any, 
 });
 
 // GET /api/admin/capacity - Get all capacity defaults and overrides
-settingsRouter.get("/api/admin/capacity", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.get("/api/admin/capacity", requireOwnerAuth, async (req, res) => {
   try {
     // Get all capacity defaults
     const allDefaults = await db.select().from(capacityDefaults);
@@ -426,7 +415,7 @@ settingsRouter.get("/api/admin/capacity", requireOwnerAuth, async (req: any, res
 });
 
 // POST /api/admin/capacity - Create capacity override
-settingsRouter.post("/api/admin/capacity", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.post("/api/admin/capacity", requireOwnerAuth, async (req, res) => {
   try {
     const { service, date_start, date_end, slot, capacity } = req.body;
 
@@ -473,7 +462,7 @@ settingsRouter.post("/api/admin/capacity", requireOwnerAuth, async (req: any, re
 });
 
 // DELETE /api/admin/capacity - Delete capacity override
-settingsRouter.delete("/api/admin/capacity", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.delete("/api/admin/capacity", requireOwnerAuth, async (req, res) => {
   try {
     const { service, date_start, date_end, slot } = req.query;
 
@@ -510,7 +499,7 @@ settingsRouter.delete("/api/admin/capacity", requireOwnerAuth, async (req: any, 
 });
 
 // POST /api/admin/capacity/reset - Reset all capacity overrides
-settingsRouter.post("/api/admin/capacity/reset", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.post("/api/admin/capacity/reset", requireOwnerAuth, async (req, res) => {
   try {
     await db.delete(capacityOverrides);
     
@@ -528,7 +517,7 @@ settingsRouter.post("/api/admin/capacity/reset", requireOwnerAuth, async (req: a
 });
 
 // POST /api/admin/capacity/upsert - Create or update capacity overrides
-settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req: any, res) => {
+settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req, res) => {
   try {
     const validation = upsertCapacitySchema.safeParse(req.body);
     

@@ -109,8 +109,8 @@ adminDogsRouter.patch("/api/admin/dogs/:id/status", requireOwnerAuth, async (req
 // Daily vaccine scan
 adminDogsRouter.post("/api/admin/tasks/daily-vaccine-scan", async (req: any, res) => {
   const provided = String(req.headers["x-admin-cron"] || "");
-  const expected = String(process.env.ADMIN_CRON_TOKEN || "");
-  if (!expected || provided.length !== expected.length ||
+  const expected = process.env.ADMIN_CRON_TOKEN || "";
+  if (!expected || !provided || provided.length !== expected.length ||
       !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected))) {
     return res.sendStatus(401);
   }
