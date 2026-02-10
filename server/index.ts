@@ -137,10 +137,11 @@ app.use((req, res, next) => {
   const adminToken = req.query.admin as string | undefined;
   if (adminToken && adminToken === BYPASS_TOKEN) {
     res.cookie('maintenance_bypass', BYPASS_TOKEN, {
-      httpOnly: false,
+      httpOnly: true,
+      secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
+      maxAge: 1000 * 60 * 60 * 24 // 1 day
     });
     return res.redirect(req.path || '/');
   }
