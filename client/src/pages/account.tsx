@@ -46,7 +46,7 @@ export default function AccountPage() {
 
   if (!user) {
     return (
-      <div className="container max-w-3xl py-8">
+      <div className="container max-w-3xl pb-8 page-content">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-4">Please Sign In</h1>
           <p className="text-muted-foreground">You need to be logged in to view your account.</p>
@@ -57,7 +57,7 @@ export default function AccountPage() {
 
   if (profileLoading || dogsLoading) {
     return (
-      <div className="container max-w-3xl py-8">
+      <div className="container max-w-3xl pb-8 page-content">
         <div className="text-center">
           <div className="text-lg">Loading your account...</div>
         </div>
@@ -67,7 +67,7 @@ export default function AccountPage() {
 
   if (profileError || dogsError) {
     return (
-      <div className="container max-w-3xl py-8">
+      <div className="container max-w-3xl pb-8 page-content">
         <div className="text-center text-red-600">
           <div>Failed to load your account information.</div>
           <div className="text-sm mt-2">Please try refreshing the page.</div>
@@ -105,7 +105,7 @@ export default function AccountPage() {
   };
 
   return (
-    <div className="container max-w-3xl py-8" data-testid="page-account">
+    <div className="container max-w-3xl pb-8 page-content" data-testid="page-account">
       <h1 className="text-2xl font-semibold mb-6">My Account</h1>
       
       {/* User Profile Section */}

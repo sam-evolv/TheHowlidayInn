@@ -130,7 +130,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="container max-w-4xl py-16 px-4">
+      <div className="container max-w-4xl pb-16 px-4 page-content">
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground">Please sign in to view your profile.</p>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
 
   if (profileLoading || dogsLoading) {
     return (
-      <div className="container max-w-4xl py-16 px-4">
+      <div className="container max-w-4xl pb-16 px-4 page-content">
         <div className="text-center">
           <div className="text-lg text-muted-foreground">Loading your profile...</div>
         </div>
@@ -151,7 +151,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-4xl py-8 px-4" data-testid="page-profile">
+    <div className="container max-w-4xl pb-8 px-4 page-content" data-testid="page-profile">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Your Profile</h1>
