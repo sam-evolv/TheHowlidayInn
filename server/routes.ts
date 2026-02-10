@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all bookings
-  app.get('/api/bookings', async (req, res) => {
+  app.get('/api/bookings', requireOwnerAuth, async (req, res) => {
     try {
       const bookings = await storage.getBookings();
       res.json(bookings);
@@ -63,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get booking by ID
-  app.get('/api/bookings/:id', async (req, res) => {
+  app.get('/api/bookings/:id', requireOwnerAuth, async (req, res) => {
     try {
       const booking = await storage.getBooking(req.params.id);
       if (!booking) {
@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Create new booking
-  app.post('/api/bookings', async (req, res) => {
+  app.post('/api/bookings', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertBookingSchema.parse(req.body);
       
@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update booking
-  app.patch('/api/bookings/:id', async (req, res) => {
+  app.patch('/api/bookings/:id', requireOwnerAuth, async (req, res) => {
     try {
       const booking = await storage.updateBooking(req.params.id, req.body);
       if (!booking) {
@@ -304,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mark trial as complete
-  app.patch('/api/bookings/:id/complete-trial', async (req, res) => {
+  app.patch('/api/bookings/:id/complete-trial', requireOwnerAuth, async (req, res) => {
     try {
       const booking = await storage.updateBooking(req.params.id, { 
         trialCompleted: true,
@@ -320,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete booking
-  app.delete('/api/bookings/:id', async (req, res) => {
+  app.delete('/api/bookings/:id', requireOwnerAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteBooking(req.params.id);
       if (!deleted) {
@@ -480,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get customer by email
-  app.get('/api/customers/email/:email', async (req, res) => {
+  app.get('/api/customers/email/:email', requireOwnerAuth, async (req, res) => {
     try {
       const customer = await storage.getCustomerByEmail(req.params.email);
       if (!customer) {
@@ -493,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get customer by Firebase UID
-  app.get('/api/customers/firebase/:uid', async (req, res) => {
+  app.get('/api/customers/firebase/:uid', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const customer = await storage.getCustomerByFirebaseUid(req.params.uid);
       if (!customer) {
@@ -506,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new customer
-  app.post('/api/customers', async (req, res) => {
+  app.post('/api/customers', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertCustomerSchema.parse(req.body);
       const customer = await storage.createCustomer(validatedData);
@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dog routes
   
   // Get dogs for a customer
-  app.get('/api/dogs/customer/:customerId', async (req, res) => {
+  app.get('/api/dogs/customer/:customerId', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const dogs = await storage.getDogsByCustomer(req.params.customerId);
       res.json(dogs);
@@ -532,7 +532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get dog by ID
-  app.get('/api/dogs/:id', async (req, res) => {
+  app.get('/api/dogs/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const dog = await storage.getDog(req.params.id);
       if (!dog) {
@@ -545,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new dog profile
-  app.post('/api/dogs', async (req, res) => {
+  app.post('/api/dogs', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       // Note: This legacy endpoint should be deprecated in favor of /api/me/dogs
       const validatedData = req.body; // Basic validation only for legacy compatibility
@@ -560,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update dog profile
-  app.patch('/api/dogs/:id', async (req, res) => {
+  app.patch('/api/dogs/:id', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const dog = await storage.updateDog(req.params.id, req.body);
       if (!dog) {
@@ -573,7 +573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete dog profile
-  app.delete('/api/dogs/:id', async (req, res) => {
+  app.delete('/api/dogs/:id', requireOwnerAuth, async (req, res) => {
     try {
       const deleted = await storage.deleteDog(req.params.id);
       if (!deleted) {
@@ -586,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get trial status for a dog
-  app.get('/api/dogs/:dogId/trial-status', async (req, res) => {
+  app.get('/api/dogs/:dogId/trial-status', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const dog = await storage.getDog(req.params.dogId);
       if (!dog) {
@@ -612,17 +612,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin: Mark trial as completed for a dog
-  app.post('/api/admin/dogs/:dogId/trial/complete', async (req, res) => {
+  app.post('/api/admin/dogs/:dogId/trial/complete', requireOwnerAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
-      const user = await storage.getUserById(userId);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin privileges required' });
-      }
 
       const dog = await storage.getDog(req.params.dogId);
       if (!dog) {
@@ -635,9 +626,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedDog = await storage.updateDog(req.params.dogId, {
         trialRequired: false,
         trialCompletedAt: completedTimestamp,
-        trialCompletedByUserId: userId,
+        trialCompletedByUserId: null,
         trialNote: note || null
-      });
+      } as any);
 
       res.json({
         message: 'Trial marked as completed',

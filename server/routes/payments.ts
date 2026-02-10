@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { db } from '../db/client';
 import { bookings } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -25,7 +26,7 @@ function getOrigin(req: Request) {
  * Returns: { url }
  * Strategy: Look up booking in database to get verified price, create a Checkout Session, and return the hosted page URL for hard redirect.
  */
-router.post('/checkout', async (req: Request, res: Response) => {
+router.post('/checkout', requireAuth, async (req: any, res: Response) => {
   try {
     const { bookingId, email } = req.body || {};
 

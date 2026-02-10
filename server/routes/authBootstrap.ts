@@ -4,6 +4,7 @@ import { db } from "../db/client";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { admin } from "../firebase-admin";
+import { ensureTenant } from "../services/userService";
 
 export const authBootstrap = Router();
 
@@ -45,8 +46,12 @@ authBootstrap.post("/api/auth/bootstrap", requireFirebaseUser(), async (req, res
     
     console.log("bootstrap: decoded token", { uid, email, name: decoded.name, display_name: decoded.display_name, displayName });
     
+    // Ensure tenant exists before inserting user
+    const tenantId = await ensureTenant();
+
     // Idempotent insert - create user if not exists, update name if changed
     await db.insert(users).values({
+      tenantId,
       id: uid, // Use Firebase UID as user ID
       email,
       name: displayName,

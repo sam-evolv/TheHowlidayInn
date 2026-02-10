@@ -20,9 +20,10 @@ async function getProhibitedBreeds(): Promise<string[]> {
   }
   
   try {
-    const response = await api.get('/settings/public');
+    const response = await api.get('/api/settings/public');
     const settings = response.data;
-    const breeds = settings.prohibitedBreeds || [];
+    // Extract from prohibitedBreeds (top-level) or breedPolicy.banned_breeds (nested)
+    const breeds = settings.prohibitedBreeds || settings.breedPolicy?.banned_breeds || [];
     cachedProhibitedBreeds = breeds;
     cacheTimestamp = now;
     return breeds;

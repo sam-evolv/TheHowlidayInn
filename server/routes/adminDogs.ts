@@ -1,6 +1,7 @@
 // TODO HowlidayInn: Admin dashboard API routes for dog management
 
 import { Router } from "express";
+import crypto from "crypto";
 import { db } from "../db/client";
 import { dogs, users, vaccinations, healthProfiles, settings as tblSettings } from "../db/schema";
 import { and, eq, ilike, or, sql, gte, lte } from "drizzle-orm";
@@ -107,7 +108,10 @@ adminDogsRouter.patch("/api/admin/dogs/:id/status", requireOwnerAuth, async (req
 
 // Daily vaccine scan
 adminDogsRouter.post("/api/admin/tasks/daily-vaccine-scan", async (req: any, res) => {
-  if (req.headers["x-admin-cron"] !== process.env.ADMIN_CRON_TOKEN) {
+  const provided = String(req.headers["x-admin-cron"] || "");
+  const expected = String(process.env.ADMIN_CRON_TOKEN || "");
+  if (!expected || provided.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected))) {
     return res.sendStatus(401);
   }
   
