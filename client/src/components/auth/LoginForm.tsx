@@ -11,7 +11,7 @@ import { useAuth } from './AuthProvider';
 import { PawPrint, Loader2, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 const logoImage = "/brand/howliday-logo-light.png";
 
 const loginSchema = z.object({
@@ -84,31 +84,30 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
           title: "Welcome back! 🐾",
           description: "You're now signed in. Your furry friend will be so happy!",
         });
-        // Small delay to allow auth state to update before redirect
-        setTimeout(async () => {
-          const currentUser = (await import('@/lib/firebase')).auth.currentUser;
-          if (currentUser) {
-            await checkUserProfileAndRedirect(currentUser.uid);
-          }
-        }, 500);
+        // Check profile and redirect - use current auth user directly
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          await checkUserProfileAndRedirect(currentUser.uid);
+        } else {
+          // Fallback: auth state not ready yet, default to profile
+          setLocation('/profile');
+        }
       } else {
         await signUp(data.email, data.password!, "Guest User", "");
         toast({
           title: "Welcome to The Howliday Inn! 🎉",
           description: "Your account has been created. Let's get started with your profile!",
         });
-        // Small delay to allow auth state to update before redirect
-        setTimeout(() => {
-          setLocation('/onboarding');
-        }, 500);
+        setLocation('/onboarding');
       }
     } catch (error: any) {
-      setIsLoading(false);
       toast({
         title: "Authentication Error",
         description: error.message || "Please try again or contact our friendly team for help.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

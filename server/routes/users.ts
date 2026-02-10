@@ -19,6 +19,7 @@ usersRouter.get("/api/me", requireAuth, async (req: AuthenticatedRequest, res) =
       id: users.id,
       email: users.email,
       name: users.name,
+      phone: users.phone,
       role: users.role,
       completedTrial: users.completedTrial,
       createdAt: users.createdAt
@@ -75,21 +76,28 @@ usersRouter.get("/api/me/trial-status", requireAuth, async (req: AuthenticatedRe
   }
 });
 
-// PATCH update user profile (name)
+// PATCH update user profile (name, phone)
 usersRouter.patch("/api/me", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const uid = req.user!.uid;
-    const { name } = req.body;
-    
+    const { name, phone } = req.body;
+
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ message: "Name is required" });
     }
-    
-    await db.update(users).set({ 
+
+    const updateData: Record<string, any> = {
       name: name.trim()
-    }).where(eq(users.id, uid));
-    
-    console.log("Profile updated for user:", uid, "name:", name);
+    };
+
+    // Update phone if provided (allow clearing it with empty string)
+    if (phone !== undefined) {
+      updateData.phone = typeof phone === 'string' ? phone.trim() || null : null;
+    }
+
+    await db.update(users).set(updateData).where(eq(users.id, uid));
+
+    console.log("Profile updated for user:", uid, "name:", name, "phone:", phone);
     res.json({ ok: true, message: "Profile updated successfully" });
   } catch (err: any) {
     console.error("PATCH /api/me error:", err);

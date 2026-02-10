@@ -18,6 +18,7 @@ settingsRouter.get("/api/settings/public", async (req, res) => {
       hours: settings.hours,
       faqs: settings.faqs,
       breedPolicy: settings.breedPolicy,
+      prohibitedBreeds: settings.prohibitedBreeds,
       trialRules: settings.trialRules
     }).from(settings).where(eq(settings.id, 1));
 
@@ -57,6 +58,7 @@ settingsRouter.get("/api/settings/public", async (req, res) => {
         crossbreeds_of_banned_not_accepted: false,
         note: ""
       },
+      prohibitedBreeds: (publicSettings?.prohibitedBreeds as string[]) || [],
       trialRules: publicSettings?.trialRules || {
         required_for_new_customers: true
       }
