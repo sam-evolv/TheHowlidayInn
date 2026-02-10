@@ -56,7 +56,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bookings', requireOwnerAuth, async (req, res) => {
     try {
       const bookings = await storage.getBookings();
-      res.json(bookings);
+      const safeBookings = bookings.map(({ email, phone, ownerName, emergencyName, emergencyPhone, ...rest }: any) => rest);
+      res.json(safeBookings);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch bookings' });
     }
