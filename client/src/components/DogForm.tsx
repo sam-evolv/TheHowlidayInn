@@ -25,8 +25,19 @@ export default function DogForm({ uid, onSaved }: { uid: string; onSaved?: () =>
     setError(undefined);
     setLoading(true);
     
-    // Breed validation is now handled by the backend API
-    // The server will return appropriate errors for prohibited breeds
+    // Client-side breed validation before submitting
+    if (!breed.trim()) {
+      setError('Please enter a breed.');
+      setLoading(false);
+      return;
+    }
+    const prohibited = await isBreedProhibited(breed);
+    if (prohibited) {
+      setError("We're sorry, but we cannot accommodate this breed at our facility. We'd be happy to recommend other excellent care providers in the area.");
+      setLoading(false);
+      return;
+    }
+
     try {
       let photoUrl: string | undefined;
       if (file) {
