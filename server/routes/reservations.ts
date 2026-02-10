@@ -14,7 +14,7 @@ import { requireAuth } from "../middleware/auth";
 const router = Router();
 
 // POST /api/reservations
-router.post("/", requireAuth, async (req: any, res: Response) => {
+router.post("/", requireAuth, async (req: Request, res: Response) => {
   try {
     const validationResult = createReservationSchema.safeParse(req.body);
     
@@ -181,7 +181,7 @@ router.post("/", requireAuth, async (req: any, res: Response) => {
 });
 
 // POST /api/reservations/:id/payment-intent
-router.post("/:id/payment-intent", requireAuth, async (req: any, res: Response) => {
+router.post("/:id/payment-intent", requireAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const validationResult = createPaymentIntentSchema.safeParse(req.body);
@@ -264,7 +264,7 @@ router.post("/:id/payment-intent", requireAuth, async (req: any, res: Response) 
 });
 
 // POST /api/reservations/:id/release
-router.post("/:id/release", requireAuth, async (req: any, res: Response) => {
+router.post("/:id/release", requireAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 

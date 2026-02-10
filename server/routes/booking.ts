@@ -2,11 +2,10 @@
 
 import { Router } from "express";
 import { db } from "../db/client";
-import { dogs, vaccinations, settings as tblSettings, bookings } from "../db/schema";
+import { dogs, vaccinations, settings as tblSettings } from "../db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import { computeDogStatus } from "../lib/dogStatus";
 import { requireAuth } from "../middleware/auth";
-import { authEither } from "../middleware/authEither";
 import { createPaymentIntent } from "../lib/stripeWrapper";
 
 export const bookingRouter = Router();

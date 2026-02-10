@@ -201,9 +201,10 @@ app.use((req, res, next) => {
 });
 
 console.log('[maintenance] state:', getMaintState());
-console.log('[maintenance] status: /_maint/status');
-console.log('[maintenance] forget bypass: /_maint/forget');
-console.log('[maintenance] toggle/bypass: configured (token hidden)');
+console.log('[maintenance] status:', '/_maint/status');
+console.log('[maintenance] forget bypass:', '/_maint/forget');
+console.log('[maintenance] toggle endpoints: /_maint/on and /_maint/off (token required)');
+console.log('[maintenance] preview:', '/maintenance.html');
 
 // ============================================================================
 // END MAINTENANCE MODE SYSTEM
@@ -665,7 +666,7 @@ if (process.env.UPLOADS_PROVIDER === 'cloudinary') {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    console.error("[error-handler]", err.stack || err);
+    console.error("[error handler]", { status, message, stack: err?.stack });
     res.status(status).json({ message });
   });
 
