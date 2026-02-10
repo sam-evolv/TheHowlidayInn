@@ -6,7 +6,7 @@ import { db } from "../db/client";
 import { dogs, users, vaccinations, healthProfiles, settings as tblSettings } from "../db/schema";
 import { and, eq, ilike, or, sql, gte, lte } from "drizzle-orm";
 import { requireAuth, requireAdmin } from "../middleware/auth";
-import { requireOwnerAuth } from "../auth/session";
+import { requireOwnerAuth, getAuth } from "../auth/session";
 import { computeDogStatus } from "../lib/dogStatus";
 
 export const adminDogsRouter = Router();
@@ -106,12 +106,19 @@ adminDogsRouter.patch("/api/admin/dogs/:id/status", requireOwnerAuth, async (req
   return res.status(400).json({ error: "Invalid status value" });
 });
 
-// Daily vaccine scan
+// Daily vaccine scan — accepts CRON token (x-admin-cron header) OR admin session cookie
 adminDogsRouter.post("/api/admin/tasks/daily-vaccine-scan", async (req: any, res) => {
+  // Method 1: CRON token via header (for automated schedulers)
   const provided = String(req.headers["x-admin-cron"] || "");
   const expected = process.env.ADMIN_CRON_TOKEN || "";
-  if (!expected || !provided || provided.length !== expected.length ||
-      !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected))) {
+  const validCronToken = !!(expected && provided &&
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(expected)));
+
+  // Method 2: Admin session cookie (for manual admin triggers)
+  const validAdminSession = !!getAuth(req);
+
+  if (!validCronToken && !validAdminSession) {
     return res.sendStatus(401);
   }
   
