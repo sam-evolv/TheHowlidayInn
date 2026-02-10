@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { COMMON_BREEDS } from "@/lib/constants";
 
 export default function DogForm({ uid, onSaved }: { uid: string; onSaved?: () => void }) {
   const [name, setName] = useState('');
@@ -93,11 +94,15 @@ export default function DogForm({ uid, onSaved }: { uid: string; onSaved?: () =>
             <Input
               id="breed"
               required
+              list="breed-suggestions"
               placeholder="e.g., Golden Retriever"
               value={breed}
               onChange={e => setBreed(e.target.value)}
               data-testid="input-dog-breed"
             />
+            <datalist id="breed-suggestions">
+              {COMMON_BREEDS.map(b => <option key={b} value={b} />)}
+            </datalist>
           </div>
 
           <div className="space-y-2">

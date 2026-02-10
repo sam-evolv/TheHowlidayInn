@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileInput } from "@/components/FileInput";
 import { dogAboutInsertSchema, vaccinationUpsertSchema, healthProfileUpsertSchema, type DogAboutInsert, type VaccinationUpsert, type HealthProfileUpsert } from "@/../../shared/schema";
 import { isBreedProhibited } from "@/lib/breeds";
+import { COMMON_BREEDS } from "@/lib/constants";
 
 // Step 1: Use shared backend schema (breed validation moved to submission logic)
 const aboutSchema = dogAboutInsertSchema;
@@ -262,8 +263,13 @@ function AboutDogStep({ form, onSubmit, isLoading }: {
                 <FormItem>
                   <FormLabel>Breed</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Golden Retriever" {...field} data-testid="input-breed" />
+                    <Input placeholder="e.g., Golden Retriever" list="breed-suggestions" {...field} data-testid="input-breed" />
                   </FormControl>
+                  <datalist id="breed-suggestions">
+                    {COMMON_BREEDS.map(breed => (
+                      <option key={breed} value={breed} />
+                    ))}
+                  </datalist>
                   <FormMessage />
                 </FormItem>
               )}
