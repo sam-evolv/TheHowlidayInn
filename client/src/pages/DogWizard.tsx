@@ -183,7 +183,7 @@ export default function DogWizard() {
   const progressPercentage = (currentStep / STEPS.length) * 100;
 
   return (
-    <div className="container mx-auto max-w-2xl py-8" data-testid="dog-wizard">
+    <div className="container mx-auto max-w-2xl pb-8 page-content" data-testid="dog-wizard">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Register Your Dog</h1>
         <p className="text-muted-foreground">Complete your dog's profile for booking eligibility</p>

@@ -18,7 +18,7 @@ export default function CancelPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 pb-16 page-content">
       <div className="max-w-2xl mx-auto">
         <Card className="text-center">
           <CardHeader>
