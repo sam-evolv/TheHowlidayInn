@@ -2,9 +2,10 @@ import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'ax
 import { auth } from '@/lib/firebase';
 import { getIdToken } from 'firebase/auth';
 
-// Centralized HTTP client - same-origin requests (Replit serves both SPA + API)
+// Centralized HTTP client - uses VITE_API_BASE for cross-origin or empty for same-origin
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 export const api = axios.create({
-  baseURL: '',  // same-origin, no prefix needed
+  baseURL: API_BASE,
   withCredentials: true,  // send/receive cookies
 });
 
