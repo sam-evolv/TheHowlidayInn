@@ -319,43 +319,62 @@ dogsRouter.get("/api/me/dogs/:id/health", requireAuth, async (req: any, res) => 
   try {
     const myId = req.user.uid;
     const { id } = req.params;
-    const d = await db.query.dogs.findFirst({ where: and(eq(dogs.id, id), eq(dogs.ownerId, myId)) });
+    const [d] = await db.select().from(dogs).where(and(eq(dogs.id, id), eq(dogs.ownerId, myId))).limit(1);
     if (!d) return res.sendStatus(404);
-    const hp = await db.query.healthProfiles.findFirst({ where: eq(healthProfiles.dogId, id) });
-    res.json(hp || {});
-  } catch (error) {
-    console.error('Error fetching health profile:', error);
-    res.status(500).json({ error: "Failed to fetch health profile", details: String(error) });
+    const rows = await db.select().from(healthProfiles).where(eq(healthProfiles.dogId, id)).limit(1);
+    res.json(rows[0] || {});
+  } catch (error: any) {
+    console.error('[health-get] ERROR:', error?.message || error, "code:", error?.code);
+    res.status(500).json({ error: "Failed to fetch health profile", message: error?.message || String(error) });
   }
 });
 
 // PATCH health
 dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) => {
+  const { id } = req.params;
+  console.log("[health-save] START dogId:", id, "uid:", req.user?.uid, "body-keys:", Object.keys(req.body || {}));
   try {
     const myId = req.user.uid;
-    const { id } = req.params;
-    const d = await db.query.dogs.findFirst({ where: and(eq(dogs.id, id), eq(dogs.ownerId, myId)) });
-    if (!d) return res.sendStatus(404);
-    
+
+    // Step 1: verify dog ownership
+    const [d] = await db.select().from(dogs).where(and(eq(dogs.id, id), eq(dogs.ownerId, myId))).limit(1);
+    if (!d) {
+      console.log("[health-save] dog not found for uid:", myId, "dogId:", id);
+      return res.sendStatus(404);
+    }
+    console.log("[health-save] dog found:", d.name);
+
+    // Step 2: validate request body
     const healthData = healthProfileUpsertSchema.parse(req.body || {});
-    
-    // Remove frontend-only fields that don't exist in database
+    console.log("[health-save] zod parse OK, keys:", Object.keys(healthData));
+
+    // Step 3: remove frontend-only fields that don't exist in database
     const { accuracyConfirmation, emergencyTreatmentConsent, ...dbHealthData } = healthData;
-    
-    const existing = await db.query.healthProfiles.findFirst({ where: eq(healthProfiles.dogId, id) });
-    if (existing) {
-      await db.update(healthProfiles).set(dbHealthData).where(eq(healthProfiles.dogId, id));
+
+    // Step 4: upsert health profile
+    const existingRows = await db.select().from(healthProfiles).where(eq(healthProfiles.dogId, id)).limit(1);
+    if (existingRows.length > 0) {
+      console.log("[health-save] updating existing profile");
+      await db.update(healthProfiles).set({ ...dbHealthData, updatedAt: new Date() }).where(eq(healthProfiles.dogId, id));
     } else {
+      console.log("[health-save] inserting new profile");
       await db.insert(healthProfiles).values({ dogId: id, ...dbHealthData });
     }
 
+    console.log("[health-save] SUCCESS");
     res.json({ ok: true });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
+      console.error("[health-save] ZodError:", JSON.stringify(error.errors));
       return res.status(400).json({ error: "Invalid health data", details: error.errors });
     }
-    console.error('Error saving health profile:', error);
-    res.status(500).json({ error: "Failed to save health profile", details: String(error), stack: (error as any)?.stack });
+    console.error("[health-save] ERROR:", error?.message || error, "code:", error?.code, "detail:", error?.detail);
+    res.status(500).json({
+      error: "Failed to save health profile",
+      message: error?.message || String(error),
+      code: error?.code,
+      detail: error?.detail,
+    });
   }
 });
 
