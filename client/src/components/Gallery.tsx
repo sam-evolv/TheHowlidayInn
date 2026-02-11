@@ -2,21 +2,26 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
-const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'demo';
+const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+
+function cloudImg(path: string): string {
+  if (!cloudName) return `/assets/${path}.jpg`;
+  return `https://res.cloudinary.com/${cloudName}/image/upload/w_800,q_auto,f_auto/v1/howliday-inn/${path}`;
+}
 
 const galleryImages = [
   {
-    src: `https://res.cloudinary.com/${cloudName}/image/upload/w_800,q_auto,f_auto/v1/howliday-inn/gallery-1`,
+    src: cloudImg("gallery-1"),
     alt: "Dog enjoying our specialised agility equipment and trampolines in the outdoor play area",
     title: "Agility & Fun Equipment"
   },
   {
-    src: `https://res.cloudinary.com/${cloudName}/image/upload/w_800,q_auto,f_auto/v1/howliday-inn/gallery-2`,
+    src: cloudImg("gallery-2"),
     alt: "Happy dogs in our secure outdoor exercise area with enrichment activities",
     title: "Outdoor Exercise Yard"
   },
   {
-    src: `https://res.cloudinary.com/${cloudName}/image/upload/w_800,q_auto,f_auto/v1/howliday-inn/gallery-3`,
+    src: cloudImg("gallery-3"),
     alt: "Dogs socializing and playing together in our supervised group activities",
     title: "Supervised Playtime"
   }
