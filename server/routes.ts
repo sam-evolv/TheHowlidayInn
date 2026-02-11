@@ -26,7 +26,7 @@ import {
 import { recomputeAndUpdateDogStatus } from "./businessLogic";
 import { getUncachableResendClient } from "./lib/resendClient.js";
 import { db } from "./db/client";
-import { users, dogs, vaccinations, healthProfiles } from "./db/schema";
+import { users, dogs, vaccinations, healthProfiles, settings } from "./db/schema";
 import { eq, desc } from "drizzle-orm";
 
 // Legacy Stripe initialization - Use getStripe() factory for safer initialization
@@ -1361,23 +1361,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get kennel settings
   app.get('/api/settings', optionalAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const settingsDoc = await adminDb.collection(COLLECTIONS.SETTINGS).doc('kennel').get();
-      
-      if (!settingsDoc.exists) {
-        // Return default settings if none exist
-        const defaultSettings = {
-          requiredVaccines: [
-            { type: 'rabies', label: 'Rabies', required: true, validityMonths: 12 },
-            { type: 'dhpp', label: 'DHPP', required: true, validityMonths: 12 },
-            { type: 'bordetella', label: 'Bordetella', required: true, validityMonths: 6 },
-          ],
-          prohibitedBreeds: [],
-          leadTimeHours: 12,
-        };
+      const defaultSettings = {
+        requiredVaccines: [
+          { type: 'rabies', label: 'Rabies', required: true, validityMonths: 12 },
+          { type: 'dhpp', label: 'DHPP', required: true, validityMonths: 12 },
+          { type: 'bordetella', label: 'Bordetella', required: true, validityMonths: 6 },
+        ],
+        prohibitedBreeds: [],
+        leadTimeHours: 12,
+      };
+
+      const rows = await db.select({
+        requiredVaccines: settings.requiredVaccines,
+        prohibitedBreeds: settings.prohibitedBreeds,
+        leadTimeHours: settings.leadTimeHours,
+      }).from(settings).where(eq(settings.id, 1));
+
+      if (rows.length === 0) {
         return res.json(defaultSettings);
       }
 
-      res.json(settingsDoc.data());
+      res.json({
+        requiredVaccines: rows[0].requiredVaccines || defaultSettings.requiredVaccines,
+        prohibitedBreeds: rows[0].prohibitedBreeds || defaultSettings.prohibitedBreeds,
+        leadTimeHours: rows[0].leadTimeHours ?? defaultSettings.leadTimeHours,
+      });
     } catch (error) {
       console.error('Error fetching settings:', error);
       res.status(500).json({ message: 'Failed to fetch settings' });
@@ -1390,15 +1398,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settingsSchema = createInsertKennelSettingsSchema();
       const validatedData = settingsSchema.parse(req.body);
 
-      const settingsRef = adminDb.collection(COLLECTIONS.SETTINGS).doc('kennel');
-      
-      await settingsRef.set({
-        ...validatedData,
-        updatedAt: new Date(),
-      }, { merge: true });
+      // Upsert settings row via Drizzle/PostgreSQL
+      const [updated] = await db
+        .update(settings)
+        .set(validatedData)
+        .where(eq(settings.id, 1))
+        .returning();
 
-      const updatedDoc = await settingsRef.get();
-      res.json(updatedDoc.data());
+      if (!updated) {
+        // Row doesn't exist yet — insert it
+        const [inserted] = await db.insert(settings).values({
+          ...validatedData,
+          requiredVaccines: validatedData.requiredVaccines ?? [],
+          prohibitedBreeds: validatedData.prohibitedBreeds ?? [],
+        }).returning();
+        return res.json(inserted);
+      }
+
+      res.json(updated);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid settings data', errors: error.errors });
