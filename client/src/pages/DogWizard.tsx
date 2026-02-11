@@ -150,7 +150,11 @@ export default function DogWizard() {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Failed to save health profile');
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        console.error('Health profile save failed:', response.status, errorBody);
+        throw new Error(errorBody.message || errorBody.error || 'Failed to save health profile');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -160,8 +164,8 @@ export default function DogWizard() {
       setLocation('/profile');
       toast({ title: "Success", description: "Dog registration completed!" });
     },
-    onError: (error) => {
-      toast({ title: "Error", description: "Failed to save health profile", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Failed to save health profile", variant: "destructive" });
     },
   });
 

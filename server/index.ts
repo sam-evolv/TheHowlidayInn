@@ -656,6 +656,41 @@ if (process.env.UPLOADS_PROVIDER === 'cloudinary') {
 }
 
 (async () => {
+  // Ensure critical database tables exist (defensive startup check)
+  try {
+    const { Pool } = await import('pg');
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS health_profiles (
+        dog_id VARCHAR(36) PRIMARY KEY,
+        behaviour_notes TEXT,
+        bite_history BOOLEAN,
+        conditions TEXT,
+        medications TEXT,
+        allergies TEXT,
+        vet_name VARCHAR(160),
+        vet_phone VARCHAR(40),
+        emergency_name VARCHAR(160),
+        emergency_phone VARCHAR(40),
+        insurance_provider VARCHAR(160),
+        policy_number VARCHAR(80),
+        feeding_brand VARCHAR(160),
+        feeding_schedule TEXT,
+        medication_name VARCHAR(160),
+        medication_dosage TEXT,
+        medication_notes TEXT,
+        pickup_contact VARCHAR(200),
+        media_permission VARCHAR(8),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    console.log('[startup] health_profiles table ensured');
+    await pool.end();
+  } catch (err: any) {
+    console.error('[startup] Failed to ensure health_profiles table:', err?.message);
+  }
+
   // Bootstrap owner account on startup
   await ensureOwnerExists();
   
