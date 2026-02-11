@@ -73,8 +73,12 @@ console.log("[server] STRIPE_SECRET_KEY present:", !!process.env.STRIPE_SECRET_K
   }
 })();
 
-// Same-origin deployment: No CORS needed (frontend and API on same domain)
-console.log("[server] Same-origin deployment: Frontend and API served from same Replit domain");
+// CORS: Allow Netlify frontend to call this API cross-origin
+const ALLOWED_ORIGINS = [
+  'https://thehowlidayinn.netlify.app',
+  'https://thehowlidayinn.ie',
+  'https://www.thehowlidayinn.ie',
+];
 
 const app = express();
 
@@ -91,6 +95,21 @@ app.use((req, _res, next) => {
 
 // trust Replit's proxy so HTTPS is detected
 app.set('trust proxy', 1);
+
+// CORS middleware — must be before routes
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('--thehowlidayinn.netlify.app'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Cron');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // one origin: https + www
 app.use((req, res, next) => {
