@@ -316,12 +316,17 @@ dogsRouter.post("/api/me/dogs/:id/vaccination-card", requireAuth, async (req: an
 
 // GET health
 dogsRouter.get("/api/me/dogs/:id/health", requireAuth, async (req: any, res) => {
-  const myId = req.user.uid;
-  const { id } = req.params;
-  const d = await db.query.dogs.findFirst({ where: and(eq(dogs.id, id), eq(dogs.ownerId, myId)) });
-  if (!d) return res.sendStatus(404);
-  const hp = await db.query.healthProfiles.findFirst({ where: eq(healthProfiles.dogId, id) });
-  res.json(hp || {});
+  try {
+    const myId = req.user.uid;
+    const { id } = req.params;
+    const d = await db.query.dogs.findFirst({ where: and(eq(dogs.id, id), eq(dogs.ownerId, myId)) });
+    if (!d) return res.sendStatus(404);
+    const hp = await db.query.healthProfiles.findFirst({ where: eq(healthProfiles.dogId, id) });
+    res.json(hp || {});
+  } catch (error) {
+    console.error('Error fetching health profile:', error);
+    res.status(500).json({ error: "Failed to fetch health profile", details: String(error) });
+  }
 });
 
 // PATCH health
@@ -350,7 +355,7 @@ dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) =
       return res.status(400).json({ error: "Invalid health data", details: error.errors });
     }
     console.error('Error saving health profile:', error);
-    res.status(500).json({ error: "Failed to save health profile" });
+    res.status(500).json({ error: "Failed to save health profile", details: String(error), stack: (error as any)?.stack });
   }
 });
 
