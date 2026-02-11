@@ -111,10 +111,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// one origin: https + www
+// one origin: https + www (only for custom domain, skip Replit/API)
 app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  // Skip redirect for Replit domain and API paths — Replit handles its own TLS
+  if (host.includes('.replit.app') || host.includes('.repl.co') || req.path.startsWith('/api/')) {
+    return next();
+  }
   const isHttps = req.headers['x-forwarded-proto'] === 'https';
-  const host = req.headers.host;
   if (!isHttps) {
     return res.redirect(301, `https://www.thehowlidayinn.ie${req.originalUrl}`);
   }
