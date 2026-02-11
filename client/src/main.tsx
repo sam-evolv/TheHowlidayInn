@@ -2,8 +2,6 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-console.log("Cloudinary Cloud Name:", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-
 // Global error handlers for visibility
 window.addEventListener('error', e => {
   console.error('GLOBAL ERROR:', e.error || e.message || e);

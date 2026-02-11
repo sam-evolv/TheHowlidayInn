@@ -66,7 +66,12 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
     };
 
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('auth middleware: verifyIdToken failed', {
+      code: error?.code,
+      message: error?.message,
+      hasProjectId: !!(process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID),
+    });
     res.status(401).json({ message: 'Invalid authentication token' });
   }
 }
