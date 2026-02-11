@@ -23,6 +23,7 @@ import { stripeHealthHandler } from "./utils/stripeHealth";
 import { authRouter } from "./routes/auth";
 import { ensureOwnerExists } from "./auth/bootstrapOwner";
 import { startSweeper } from "./jobs/sweeper";
+import { admin } from "./firebase-admin";
 
 // TODO HowlidayInn: Startup environment variable checks
 function checkRequiredEnvVars() {
@@ -660,7 +661,18 @@ if (process.env.UPLOADS_PROVIDER === 'cloudinary') {
   
   const server = await registerRoutes(app);
 
-  app.get('/api/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
+  app.get('/api/health', (_req, res) => {
+    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+    res.json({
+      ok: true,
+      ts: Date.now(),
+      firebase: {
+        initialized: admin.apps.length > 0,
+        projectId: projectId ? `${projectId.substring(0, 8)}...` : null,
+        hasServiceKey: !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      },
+    });
+  });
 
   // Health endpoints - defined before SPA fallback to prevent hijacking
   app.get("/api/ops/health/firebase", firebaseHealthHandler);
