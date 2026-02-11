@@ -4,12 +4,12 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["imagemagick_light"]
+packages = ["imagemagick_light", "psmisc"]
 
 [deployment]
-deploymentTarget = "autoscale"
+deploymentTarget = "gce"
 build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+run = ["sh", "-c", "node dist/index.js"]
 
 [[ports]]
 localPort = 5000
@@ -17,7 +17,6 @@ externalPort = 80
 
 [[ports]]
 localPort = 9005
-externalPort = 3003
 
 [env]
 PORT = "5000"
