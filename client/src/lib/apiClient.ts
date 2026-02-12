@@ -1,9 +1,8 @@
 // TODO HowlidayInn: API client with Firebase authentication (same-origin)
 import { getAuth } from 'firebase/auth';
 
-// ---- API base: use VITE_API_BASE for cross-origin, empty for same-origin ----
-const RAW_BASE = import.meta.env.VITE_API_BASE || '';
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+// ---- Same-origin deployment: always use relative paths ----
+const API_BASE = '';
 const joinPath = (p: string) => '/' + (p ?? '').replace(/^\/+/, '');
 
 // ---- Firebase auth token (if present) ----

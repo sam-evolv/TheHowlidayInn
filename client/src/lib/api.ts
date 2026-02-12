@@ -2,8 +2,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'ax
 import { auth } from '@/lib/firebase';
 import { getIdToken } from 'firebase/auth';
 
-// Centralized HTTP client - uses VITE_API_BASE for cross-origin or empty for same-origin
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+// Same-origin deployment: always use relative paths
+const API_BASE = '';
 export const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,  // send/receive cookies

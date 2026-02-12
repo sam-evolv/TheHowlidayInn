@@ -21,13 +21,12 @@ export async function ensureUserRow() {
   await user.getIdToken(true);
 
   try {
-    await api.post('/auth/bootstrap');
+    await api.post('/api/auth/bootstrap');
   } catch (error: any) {
     if (error.response?.status === 401) {
-      // Token timing edge: refresh once and retry
       await user.getIdToken(true);
       try {
-        await api.post('/auth/bootstrap');
+        await api.post('/api/auth/bootstrap');
       } catch (retryError: any) {
         console.warn("Bootstrap failed after retry", retryError.response?.status, retryError.message);
       }

@@ -2,9 +2,8 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { auth } from '@/lib/firebase';
 import { getIdToken } from 'firebase/auth';
 
-// ---- API base: use VITE_API_BASE for cross-origin, empty for same-origin ----
-const RAW_BASE = import.meta.env.VITE_API_BASE || '';
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+// ---- Same-origin deployment: always use relative paths ----
+const API_BASE = '';
 const joinPath = (p: string) => '/' + (p ?? '').replace(/^\/+/, '');
 
 async function throwIfResNotOk(res: Response) {
