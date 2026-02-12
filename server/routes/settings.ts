@@ -5,6 +5,7 @@ import { settings, configSettings, capacityDefaults, capacityOverrides, reservat
 import { eq, sql, and, lte, gte, or } from "drizzle-orm";
 import { upsertCapacitySchema } from "../../shared/schema";
 import { requireOwnerAuth } from "../auth/session";
+import { ensureTenant } from "../services/userService";
 
 const settingsRouter = Router();
 
@@ -286,7 +287,9 @@ settingsRouter.post("/api/settings/capacity", requireOwnerAuth, async (req, res)
         .where(eq(configSettings.key, "capacity"));
     } else {
       // Create new
+      const tenantId = await ensureTenant();
       await db.insert(configSettings).values({
+        tenantId,
         key: "capacity",
         value: JSON.stringify(capacityData),
       });
@@ -341,10 +344,11 @@ settingsRouter.put("/api/capacity/defaults", requireOwnerAuth, async (req, res) 
       { service: "Trial Day", capacity: parseInt(trial) },
     ];
 
+    const tenantId = await ensureTenant();
     for (const { service, capacity } of updates) {
       await db
         .insert(capacityDefaults)
-        .values({ service, capacity })
+        .values({ tenantId, service, capacity })
         .onConflictDoUpdate({
           target: [capacityDefaults.service],
           set: { capacity, updatedAt: new Date() },
@@ -429,7 +433,9 @@ settingsRouter.post("/api/admin/capacity", requireOwnerAuth, async (req, res) =>
     const slotValue = slot || "ALL_DAY";
     const dateEndValue = date_end || date_start;
 
+    const tenantId = await ensureTenant();
     await db.insert(capacityOverrides).values({
+      tenantId,
       service,
       dateStart: date_start,
       dateEnd: dateEndValue,
@@ -552,7 +558,9 @@ settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req, 
 
     if (mode === "single" && date && capacity !== undefined) {
       // Upsert override for single date (idempotent)
+      const tenantId = await ensureTenant();
       await db.insert(capacityOverrides).values({
+        tenantId,
         service,
         dateStart: date,
         dateEnd: date,
@@ -572,7 +580,9 @@ settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req, 
       });
     } else if (mode === "range" && dateStart && dateEnd && capacity !== undefined) {
       // Upsert override for date range (idempotent)
+      const tenantIdRange = await ensureTenant();
       await db.insert(capacityOverrides).values({
+        tenantId: tenantIdRange,
         service,
         dateStart,
         dateEnd,

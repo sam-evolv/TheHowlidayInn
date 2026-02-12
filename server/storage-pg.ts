@@ -5,6 +5,7 @@ import { db } from "./db/client";
 import { bookings, users, dogs, settings } from "./db/schema";
 import { eq, desc } from "drizzle-orm";
 import type { IStorage } from "./storage";
+import { ensureTenant } from "./services/userService";
 
 export class PostgresStorage implements IStorage {
   // Booking operations
@@ -36,7 +37,9 @@ export class PostgresStorage implements IStorage {
       endDate = startDate;
     }
     
+    const tenantId = await ensureTenant();
     const booking = {
+      tenantId,
       id,
       customerId: insertBooking.customerId || randomUUID(),
       dogId: insertBooking.dogId || null,
@@ -114,7 +117,9 @@ export class PostgresStorage implements IStorage {
 
   async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
     const id = randomUUID();
+    const tenantId = await ensureTenant();
     const customer = {
+      tenantId,
       id,
       email: insertCustomer.email,
       name: insertCustomer.name,

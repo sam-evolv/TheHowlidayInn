@@ -66,6 +66,7 @@ export const dogs = pgTable("dogs", {
 }));
 
 export const vaccinations = pgTable("vaccinations", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey(),
   dogId: varchar("dog_id", { length: 36 }).notNull(),
   type: varchar("type", { length: 40 }).notNull(), // dhpp | kennel_cough | leptospirosis
@@ -80,6 +81,7 @@ export const vaccinations = pgTable("vaccinations", {
 }));
 
 export const healthProfiles = pgTable("health_profiles", {
+  tenantId: uuid("tenant_id").notNull(),
   dogId: varchar("dog_id", { length: 36 }).primaryKey(),
   behaviourNotes: text("behaviour_notes"),
   biteHistory: boolean("bite_history"),
@@ -128,6 +130,7 @@ export const settings = pgTable("settings", {
 });
 
 export const bookings = pgTable("bookings", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey(),
   dogId: varchar("dog_id", { length: 36 }), // FK → dogs.id (nullable for legacy bookings)
   userId: varchar("user_id", { length: 36 }), // FK → users.id (nullable for legacy bookings)
@@ -197,6 +200,7 @@ export const bookings = pgTable("bookings", {
 }));
 
 export const reminders = pgTable("reminders", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey(),
   bookingId: varchar("booking_id", { length: 36 }).notNull(), // FK → bookings.id
   reminderType: varchar("reminder_type", { length: 32 }).notNull(), // upcoming_booking, day_before, etc.
@@ -211,6 +215,7 @@ export const reminders = pgTable("reminders", {
 }));
 
 export const availability = pgTable("availability", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   service: varchar("service", { length: 32 }).notNull(), // Daycare, Boarding, Trial Day
   date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
@@ -226,6 +231,7 @@ export const availability = pgTable("availability", {
 }));
 
 export const reservations = pgTable("reservations", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   service: varchar("service", { length: 32 }).notNull(),
   date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
@@ -246,6 +252,7 @@ export const reservations = pgTable("reservations", {
 }));
 
 export const configSettings = pgTable("config_settings", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   key: varchar("key", { length: 64 }).notNull().unique(),
   value: text("value").notNull(),
@@ -253,12 +260,14 @@ export const configSettings = pgTable("config_settings", {
 });
 
 export const capacityDefaults = pgTable("capacity_defaults", {
+  tenantId: uuid("tenant_id").notNull(),
   service: varchar("service", { length: 32 }).primaryKey(), // Daycare, Boarding, Trial Day
   capacity: integer("capacity").notNull(), // Default max capacity for this service
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow()
 });
 
 export const capacityOverrides = pgTable("capacity_overrides", {
+  tenantId: uuid("tenant_id").notNull(),
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   service: varchar("service", { length: 32 }).notNull(), // Daycare, Boarding, Trial Day
   dateStart: varchar("date_start", { length: 10 }).notNull(), // YYYY-MM-DD

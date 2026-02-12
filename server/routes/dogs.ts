@@ -257,7 +257,9 @@ dogsRouter.post("/api/me/dogs/:id/vaccinations", requireAuth, async (req: any, r
     
     // naive upsert by delete+insert to keep code short
     await db.delete(vaccinations).where(and(eq(vaccinations.dogId, id), eq(vaccinations.type, vaccinationData.type)));
+    const tenantId = await ensureTenant();
     await db.insert(vaccinations).values({
+      tenantId,
       id: vId,
       dogId: id,
       ...vaccinationData,
@@ -358,7 +360,8 @@ dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) =
       await db.update(healthProfiles).set({ ...dbHealthData, updatedAt: new Date() }).where(eq(healthProfiles.dogId, id));
     } else {
       console.log("[health-save] inserting new profile");
-      await db.insert(healthProfiles).values({ dogId: id, ...dbHealthData });
+      const tenantId = await ensureTenant();
+      await db.insert(healthProfiles).values({ tenantId, dogId: id, ...dbHealthData });
     }
 
     console.log("[health-save] SUCCESS");

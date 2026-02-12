@@ -4,6 +4,7 @@ import { eq, and, gte, lte, sql } from 'drizzle-orm';
 import { getUncachableResendClient } from './resendClient';
 import { generateBookingReminderEmail } from './emailTemplates';
 import { randomUUID } from 'crypto';
+import { ensureTenant } from '../services/userService';
 
 export interface ReminderSettings {
   daysBefore: number;
@@ -111,7 +112,9 @@ export async function sendBookingReminder(bookingId: string): Promise<boolean> {
     if (result.error) {
       console.error(`Failed to send reminder for booking ${bookingId}:`, result.error);
       
+      const tenantId = await ensureTenant();
       await db.insert(reminders).values({
+        tenantId,
         id: randomUUID(),
         bookingId: booking.id,
         reminderType: 'day_before',
@@ -123,7 +126,9 @@ export async function sendBookingReminder(bookingId: string): Promise<boolean> {
       return false;
     }
 
+    const tenantId = await ensureTenant();
     await db.insert(reminders).values({
+      tenantId,
       id: randomUUID(),
       bookingId: booking.id,
       reminderType: 'day_before',
@@ -138,7 +143,9 @@ export async function sendBookingReminder(bookingId: string): Promise<boolean> {
     console.error(`Failed to send reminder for booking ${bookingId}:`, error);
     
     try {
+      const tenantId = await ensureTenant();
       await db.insert(reminders).values({
+        tenantId,
         id: randomUUID(),
         bookingId,
         reminderType: 'day_before',
