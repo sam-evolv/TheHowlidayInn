@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useAuth } from './AuthProvider';
 import { PawPrint, Loader2, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
+import { api } from '@/lib/api';
 const logoImage = "/brand/howliday-logo-light.png";
 
 const loginSchema = z.object({
@@ -41,16 +41,15 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
     },
   });
 
-  const checkUserProfileAndRedirect = async (uid: string) => {
+  const checkUserProfileAndRedirect = async (_uid: string) => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
+      const res = await api.get('/me');
+      if (res.data?.id) {
         setLocation('/profile');
       } else {
         setLocation('/onboarding');
       }
     } catch (error) {
-      console.error('Error checking user profile:', error);
       setLocation('/onboarding');
     }
   };

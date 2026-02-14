@@ -1023,7 +1023,14 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              {(dog as any).trialRequired ? (
+                              {(dog as any).trialCompletedAt ? (
+                                <div className="space-y-1">
+                                  <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                                  <div className="text-xs text-muted-foreground">
+                                    {format(new Date((dog as any).trialCompletedAt), 'MMM d, yyyy')}
+                                  </div>
+                                </div>
+                              ) : (
                                 <div className="space-y-1">
                                   <Badge className="bg-amber-100 text-amber-800">Required</Badge>
                                   <Button
@@ -1034,18 +1041,9 @@ export default function Admin() {
                                     data-testid={`button-mark-trial-complete-${dog.id}`}
                                   >
                                     <CheckCircle className="h-3 w-3 mr-1" />
-                                    Mark Complete
+                                    Override - Mark Complete
                                   </Button>
                                 </div>
-                              ) : (dog as any).trialCompletedAt ? (
-                                <div className="space-y-1">
-                                  <Badge className="bg-green-100 text-green-800">✓ Completed</Badge>
-                                  <div className="text-xs text-muted-foreground">
-                                    {format(new Date((dog as any).trialCompletedAt), 'MMM d, yyyy')}
-                                  </div>
-                                </div>
-                              ) : (
-                                <Badge variant="outline">N/A</Badge>
                               )}
                             </div>
                           </TableCell>
@@ -1376,6 +1374,7 @@ export default function Admin() {
         selectedDog={selectedDog}
         updateDogStatus={updateDogStatus}
         getStatusColor={getStatusColor}
+        markTrialComplete={markTrialComplete}
       />
     </div>
   );
@@ -1567,7 +1566,7 @@ function ReminderSettings() {
   );
 }
 
-function DogDetailsModal({ dogDetailsOpen, setDogDetailsOpen, selectedDog, updateDogStatus, getStatusColor }: any) {
+function DogDetailsModal({ dogDetailsOpen, setDogDetailsOpen, selectedDog, updateDogStatus, getStatusColor, markTrialComplete }: any) {
   const dog = selectedDog?.dog;
   const health = selectedDog?.health;
   const vaccinations = selectedDog?.vaccinations || [];
@@ -1789,6 +1788,47 @@ function DogDetailsModal({ dogDetailsOpen, setDogDetailsOpen, selectedDog, updat
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Trial Day Status */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Trial Day Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {(dog as any).trialCompletedAt ? (
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date((dog as any).trialCompletedAt), 'MMM d, yyyy')}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-amber-100 text-amber-800">Trial Required</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            This dog has not completed a trial day yet
+                          </span>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            markTrialComplete(dog.id, dog.name);
+                          }}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Override - Mark Trial Complete
+                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          Use this if the dog has already completed a trial day prior to the website being set up.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 justify-end pt-4 border-t">

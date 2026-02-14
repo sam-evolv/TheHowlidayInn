@@ -24,6 +24,7 @@ import DogSelector from "@/components/booking/DogSelector";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useReservationFlow } from "@/hooks/useReservationFlow";
 import TrialGateCard from "@/components/booking/TrialGateCard";
+import TrialRequiredDialog from "@/components/booking/TrialRequiredDialog";
 import { TrialCompletionGate } from "@/components/booking/TrialCompletionGate";
 import { isBookingPauseActive } from "@/config/featureFlags";
 
@@ -59,6 +60,7 @@ export default function Boarding() {
   const [selectedDogId, setSelectedDogId] = useState<string>('');
   const [selectedDog, setSelectedDog] = useState<any>(null);
   const [showTrialGateModal, setShowTrialGateModal] = useState(false);
+  const [showTrialRequiredDialog, setShowTrialRequiredDialog] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<BoardingFormData | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -264,14 +266,9 @@ export default function Boarding() {
         return;
       }
 
-      const customerStatus = await checkCustomerStatus(data.email);
-      if (customerStatus.isFirstTime) {
-        toast({
-          title: "Trial Day Required",
-          description: "New customers must complete a trial day first. Redirecting...",
-          variant: "default"
-        });
-        setTimeout(() => window.location.href = "/trial", 1500);
+      // Check if selected dog needs trial day (server-side check)
+      if (selectedDogId && dogTrialStatus && !dogTrialStatus.eligible) {
+        setShowTrialRequiredDialog(true);
         setIsSubmitting(false);
         return;
       }
@@ -732,6 +729,15 @@ export default function Boarding() {
           onClose={() => setShowTrialGateModal(false)}
           onPass={handleTrialGatePass}
           service="boarding"
+        />
+
+        {/* Trial Required Dialog (shown when dog needs trial day) */}
+        <TrialRequiredDialog
+          open={showTrialRequiredDialog}
+          onOpenChange={setShowTrialRequiredDialog}
+          dogName={selectedDog?.name || 'Your dog'}
+          reason={dogTrialStatus?.reason === 'TRIAL_COOLDOWN' ? 'trial_cooldown' : 'trial_required'}
+          eligibleAt={dogTrialStatus?.eligibleAt}
         />
       </div>
     </div>

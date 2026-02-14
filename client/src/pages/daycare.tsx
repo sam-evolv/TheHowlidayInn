@@ -25,6 +25,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useReservationFlow } from "@/hooks/useReservationFlow";
 import { AvailabilityIndicator } from "@/components/booking/AvailabilityIndicator";
 import TrialGateCard from "@/components/booking/TrialGateCard";
+import TrialRequiredDialog from "@/components/booking/TrialRequiredDialog";
 import { TrialCompletionGate } from "@/components/booking/TrialCompletionGate";
 import { isBookingPauseActive } from "@/config/featureFlags";
 
@@ -57,6 +58,7 @@ export default function Daycare() {
   const [selectedDogId, setSelectedDogId] = useState<string>('');
   const [selectedDog, setSelectedDog] = useState<any>(null);
   const [showTrialGateModal, setShowTrialGateModal] = useState(false);
+  const [showTrialRequiredDialog, setShowTrialRequiredDialog] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<DaycareFormData | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -237,11 +239,9 @@ export default function Daycare() {
       return;
     }
 
-    // Check if customer is first-time
-    const customerStatus = await checkCustomerStatus(data.email);
-    if (customerStatus.isFirstTime) {
-      // Redirect to trial page for first-time customers
-      window.location.href = "/trial";
+    // Check if selected dog needs trial day (server-side check)
+    if (selectedDogId && dogTrialStatus && !dogTrialStatus.eligible) {
+      setShowTrialRequiredDialog(true);
       return;
     }
 
@@ -560,6 +560,15 @@ export default function Daycare() {
           onClose={() => setShowTrialGateModal(false)}
           onPass={handleTrialGatePass}
           service="daycare"
+        />
+
+        {/* Trial Required Dialog (shown when dog needs trial day) */}
+        <TrialRequiredDialog
+          open={showTrialRequiredDialog}
+          onOpenChange={setShowTrialRequiredDialog}
+          dogName={selectedDog?.name || 'Your dog'}
+          reason={dogTrialStatus?.reason === 'TRIAL_COOLDOWN' ? 'trial_cooldown' : 'trial_required'}
+          eligibleAt={dogTrialStatus?.eligibleAt}
         />
       </div>
     </div>
