@@ -251,24 +251,6 @@ export default function StripeCheckout({ bookingData, onSuccess, onCancel }: Str
     loadStripeKey();
   }, []);
 
-  // Error if no publishable key
-  if (error === 'MISSING_KEY' || (!stripeKeyLoading && !stripePromise)) {
-    return (
-      <Card className="max-w-2xl mx-auto">
-        <CardContent className="text-center py-12 space-y-4">
-          <p className="text-red-600 text-sm font-medium">MISSING_PUBLISHABLE_KEY</p>
-          <p className="text-sm text-muted-foreground">
-            Stripe publishable key not configured. Please contact support.
-          </p>
-          <Button onClick={onCancel} variant="outline" data-testid="button-cancel-retry">
-            Go Back
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Unified payment initialization
   const initPayment = async () => {
     try {
       setError(undefined);
@@ -284,7 +266,7 @@ export default function StripeCheckout({ bookingData, onSuccess, onCancel }: Str
         days = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
       }
 
-      const amount = Math.round(basePrice * numDogs * days * 100); // Convert to cents
+      const amount = Math.round(basePrice * numDogs * days * 100);
 
       const response = await api.post('/api/checkout/create-intent', {
         amount,
@@ -316,6 +298,22 @@ export default function StripeCheckout({ bookingData, onSuccess, onCancel }: Str
       initPayment().catch(() => setError("NO_CLIENT_SECRET"));
     }
   }, [stripeKeyLoading, stripePromise]);
+
+  if (error === 'MISSING_KEY' || (!stripeKeyLoading && !stripePromise)) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="text-center py-12 space-y-4">
+          <p className="text-red-600 text-sm font-medium">MISSING_PUBLISHABLE_KEY</p>
+          <p className="text-sm text-muted-foreground">
+            Stripe publishable key not configured. Please contact support.
+          </p>
+          <Button onClick={onCancel} variant="outline" data-testid="button-cancel-retry">
+            Go Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (stripeKeyLoading || isLoading) {
     return (

@@ -28,7 +28,6 @@ export function StripeWrapper({ bookingId, reservationId, serviceType, amount, d
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [stripeKeyLoading, setStripeKeyLoading] = useState(true);
 
-  // Load Stripe publishable key on mount
   useEffect(() => {
     async function loadStripeKey() {
       try {
@@ -51,68 +50,6 @@ export function StripeWrapper({ bookingId, reservationId, serviceType, amount, d
     loadStripeKey();
   }, []);
 
-  // Branded success screen
-  if (success) {
-    return (
-      <div className="text-center py-12 space-y-4">
-        <p className="text-green-600 font-semibold text-lg">🎉 Booking Confirmed!</p>
-        <p className="text-muted-foreground text-sm">
-          Thank you for booking with The Howliday Inn. A confirmation email has been sent.
-        </p>
-        <p className="text-2xl">🐾</p>
-      </div>
-    );
-  }
-
-  // Branded error screen with retry
-  if (error === "PAYMENT_FAILED") {
-    return (
-      <div className="text-center py-12 space-y-4">
-        <p className="text-red-600 font-semibold text-lg">⚠️ Payment could not be processed</p>
-        <p className="text-muted-foreground text-sm">
-          Something went wrong while connecting to our payment system.
-          Please try again or contact The Howliday Inn team directly.
-        </p>
-        <button
-          onClick={() => {
-            setError(undefined);
-            initPayment();
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          data-testid="button-retry-payment"
-        >
-          Retry Payment
-        </button>
-        <a href="mailto:howlidayinn1@gmail.com" className="block text-blue-600 underline" data-testid="link-contact-support">
-          Contact Support
-        </a>
-      </div>
-    );
-  }
-
-  // Error if no publishable key
-  if (error === 'MISSING_KEY' || (!stripeKeyLoading && !stripePromise)) {
-    return (
-      <div className="text-center py-8 space-y-4">
-        <p className="text-red-600 text-sm font-medium">MISSING_PUBLISHABLE_KEY</p>
-        <p className="text-sm text-muted-foreground">
-          Stripe publishable key not configured. Please contact support.
-        </p>
-      </div>
-    );
-  }
-
-  // Loading state while fetching Stripe key
-  if (stripeKeyLoading || !stripePromise) {
-    return (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-sm text-muted-foreground">Initializing payment...</p>
-      </div>
-    );
-  }
-
-  // Unified payment initialization using the new helper
   const initPayment = useCallback(async () => {
     try {
       setError(undefined);
@@ -168,6 +105,63 @@ export function StripeWrapper({ bookingId, reservationId, serviceType, amount, d
       void initPayment();
     }
   }, [stripeKeyLoading, stripePromise, email, initPayment]);
+
+  if (success) {
+    return (
+      <div className="text-center py-12 space-y-4">
+        <p className="text-green-600 font-semibold text-lg">🎉 Booking Confirmed!</p>
+        <p className="text-muted-foreground text-sm">
+          Thank you for booking with The Howliday Inn. A confirmation email has been sent.
+        </p>
+        <p className="text-2xl">🐾</p>
+      </div>
+    );
+  }
+
+  if (error === "PAYMENT_FAILED") {
+    return (
+      <div className="text-center py-12 space-y-4">
+        <p className="text-red-600 font-semibold text-lg">⚠️ Payment could not be processed</p>
+        <p className="text-muted-foreground text-sm">
+          Something went wrong while connecting to our payment system.
+          Please try again or contact The Howliday Inn team directly.
+        </p>
+        <button
+          onClick={() => {
+            setError(undefined);
+            initPayment();
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          data-testid="button-retry-payment"
+        >
+          Retry Payment
+        </button>
+        <a href="mailto:howlidayinn1@gmail.com" className="block text-blue-600 underline" data-testid="link-contact-support">
+          Contact Support
+        </a>
+      </div>
+    );
+  }
+
+  if (error === 'MISSING_KEY' || (!stripeKeyLoading && !stripePromise)) {
+    return (
+      <div className="text-center py-8 space-y-4">
+        <p className="text-red-600 text-sm font-medium">MISSING_PUBLISHABLE_KEY</p>
+        <p className="text-sm text-muted-foreground">
+          Stripe publishable key not configured. Please contact support.
+        </p>
+      </div>
+    );
+  }
+
+  if (stripeKeyLoading || !stripePromise) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="mt-4 text-sm text-muted-foreground">Initializing payment...</p>
+      </div>
+    );
+  }
 
   if (!clientSecret) {
     return (
