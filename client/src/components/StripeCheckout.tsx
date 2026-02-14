@@ -286,7 +286,7 @@ export default function StripeCheckout({ bookingData, onSuccess, onCancel }: Str
 
       const amount = Math.round(basePrice * numDogs * days * 100); // Convert to cents
 
-      const response = await api.post('/checkout/create-intent', {
+      const response = await api.post('/api/checkout/create-intent', {
         amount,
         currency: "eur"
       });

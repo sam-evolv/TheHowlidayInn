@@ -608,7 +608,7 @@ export default function Admin() {
       if (selectedStatus && selectedStatus !== 'all') params.set('status', selectedStatus);
       if (searchTerm) params.set('q', searchTerm);
       
-      const response = await api.get(`/admin/bookings/export?${params}`, {
+      const response = await api.get(`/api/admin/bookings/export?${params}`, {
         headers: { 'Accept': 'text/csv' },
         responseType: 'blob'
       });

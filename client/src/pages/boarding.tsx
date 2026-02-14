@@ -136,7 +136,7 @@ export default function Boarding() {
     queryKey: ['/api/availability', serviceType, checkinDate],
     enabled: !!checkinDate && checkinDate.length > 0,
     queryFn: async () => {
-      const response = await api.get(`/availability?date=${checkinDate}&service=${encodeURIComponent(serviceType)}`);
+      const response = await api.get(`/api/availability?date=${checkinDate}&service=${encodeURIComponent(serviceType)}`);
       return response.data;
     },
     staleTime: 10000, // Cache for 10 seconds

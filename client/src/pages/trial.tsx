@@ -177,7 +177,7 @@ export default function Trial() {
     queryKey: ['/api/availability', 'trial', trialDate],
     enabled: !!trialDate && trialDate.length > 0,
     queryFn: async () => {
-      const response = await api.get(`/availability?date=${trialDate}&serviceType=trial`);
+      const response = await api.get(`/api/availability?date=${trialDate}&serviceType=trial`);
       return response.data;
     },
     staleTime: 10000, // Cache for 10 seconds

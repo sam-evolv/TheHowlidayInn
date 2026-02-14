@@ -43,7 +43,7 @@ export default function LoginForm({ onToggleMode, isLogin }: LoginFormProps) {
 
   const checkUserProfileAndRedirect = async (_uid: string) => {
     try {
-      const res = await api.get('/me');
+      const res = await api.get('/api/me');
       if (res.data?.id) {
         setLocation('/profile');
       } else {

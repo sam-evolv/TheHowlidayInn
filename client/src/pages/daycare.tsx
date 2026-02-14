@@ -180,7 +180,7 @@ export default function Daycare() {
     queryKey: ['/api/availability', 'daycare', selectedDate],
     enabled: !!selectedDate && selectedDate.length > 0,
     queryFn: async () => {
-      const response = await api.get(`/availability?date=${selectedDate}&service=Daycare`);
+      const response = await api.get(`/api/availability?date=${selectedDate}&service=Daycare`);
       const result = response.data;
       // Map API response to expected format
       if (result.success && result.data) {

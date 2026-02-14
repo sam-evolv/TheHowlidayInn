@@ -29,7 +29,7 @@ export async function createPaymentIntent(payload: CreateIntentPayload = {}) {
   }
 
   try {
-    const response = await api.post('/checkout/create-intent-by-booking', body);
+    const response = await api.post('/api/checkout/create-intent-by-booking', body);
     const json = response.data;
     if (!json?.clientSecret) {
       throw new Error("NO_CLIENT_SECRET");
