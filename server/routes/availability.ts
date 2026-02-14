@@ -43,7 +43,7 @@ router.get("/", async (req: Request, res: Response) => {
         confirmed: 0,
       })
       .onConflictDoUpdate({
-        target: [availability.service, availability.date, availability.slot],
+        target: [availability.tenantId, availability.service, availability.date, availability.slot],
         set: {
           capacity: effectiveCapacity,
           updatedAt: new Date(),
@@ -64,11 +64,12 @@ router.get("/", async (req: Request, res: Response) => {
         remaining,
       },
     });
-  } catch (error) {
-    console.error("[availability] Error fetching availability:", error);
+  } catch (error: any) {
+    console.error("[availability] Error fetching availability:", error?.message || error);
     return res.status(500).json({ 
       success: false, 
-      error: "Failed to fetch availability" 
+      error: "Failed to fetch availability",
+      detail: process.env.NODE_ENV !== "production" ? (error?.message || String(error)) : undefined
     });
   }
 });

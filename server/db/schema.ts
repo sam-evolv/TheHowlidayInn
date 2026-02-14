@@ -226,8 +226,9 @@ export const availability = pgTable("availability", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow()
 }, (t) => ({
-  serviceDateIdx: index("availability_service_date_idx").on(t.service, t.date),
-  uniqueServiceDateSlot: uniqueIndex("availability_unique_idx").on(t.service, t.date, t.slot)
+  tenantIdx: index("availability_tenant_idx").on(t.tenantId),
+  tenantServiceDateIdx: index("availability_tenant_service_date_idx").on(t.tenantId, t.service, t.date),
+  uniqueServiceDateSlot: uniqueIndex("availability_unique_idx").on(t.tenantId, t.service, t.date, t.slot)
 }));
 
 export const reservations = pgTable("reservations", {
@@ -277,9 +278,10 @@ export const capacityOverrides = pgTable("capacity_overrides", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow()
 }, (t) => ({
-  serviceIdx: index("capacity_overrides_service_idx").on(t.service),
+  tenantIdx: index("capacity_overrides_tenant_idx").on(t.tenantId),
+  tenantServiceIdx: index("capacity_overrides_tenant_service_idx").on(t.tenantId, t.service),
   dateIdx: index("capacity_overrides_date_idx").on(t.dateStart, t.dateEnd),
-  uniqueOverride: uniqueIndex("capacity_overrides_unique_idx").on(t.service, t.dateStart, t.dateEnd, t.slot)
+  uniqueOverride: uniqueIndex("capacity_overrides_unique_idx").on(t.tenantId, t.service, t.dateStart, t.dateEnd, t.slot)
 }));
 
 // TODO HowlidayInn: Future tables should be added in server/db/schema.ts so drizzle-kit picks them up

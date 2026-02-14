@@ -350,7 +350,7 @@ settingsRouter.put("/api/capacity/defaults", requireOwnerAuth, async (req, res) 
         .insert(capacityDefaults)
         .values({ tenantId, service, capacity })
         .onConflictDoUpdate({
-          target: [capacityDefaults.service],
+          target: [capacityDefaults.tenantId, capacityDefaults.service],
           set: { capacity, updatedAt: new Date() },
         });
     }
@@ -443,6 +443,7 @@ settingsRouter.post("/api/admin/capacity", requireOwnerAuth, async (req, res) =>
       capacity,
     }).onConflictDoUpdate({
       target: [
+        capacityOverrides.tenantId,
         capacityOverrides.service,
         capacityOverrides.dateStart,
         capacityOverrides.dateEnd,
@@ -568,6 +569,7 @@ settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req, 
         capacity,
       }).onConflictDoUpdate({
         target: [
+          capacityOverrides.tenantId,
           capacityOverrides.service, 
           capacityOverrides.dateStart, 
           capacityOverrides.dateEnd, 
@@ -590,6 +592,7 @@ settingsRouter.post("/api/admin/capacity/upsert", requireOwnerAuth, async (req, 
         capacity,
       }).onConflictDoUpdate({
         target: [
+          capacityOverrides.tenantId,
           capacityOverrides.service,
           capacityOverrides.dateStart,
           capacityOverrides.dateEnd,
