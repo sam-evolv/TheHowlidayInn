@@ -10,6 +10,7 @@ import type { PgTransaction } from "drizzle-orm/pg-core";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { getDailyWindows, isClosed, isWeekend } from "../../shared/hoursPolicy";
 import { requireAuth } from "../middleware/auth";
+import { ensureTenant } from "../services/userService";
 
 const router = Router();
 
@@ -102,10 +103,12 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
 
       // If no availability record exists, create one
       if (!availabilityRecord) {
+        const tenantId = await ensureTenant();
         const defaultCapacity = getCapacityForService(service);
         const [newRecord] = await tx
           .insert(availability)
           .values({
+            tenantId,
             service,
             date,
             slot: slotValue,
@@ -131,9 +134,11 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
       expiresAt.setMinutes(expiresAt.getMinutes() + ttlMinutes);
 
       // Create reservation
+      const tenantIdForRes = await ensureTenant();
       const [reservation] = await tx
         .insert(reservations)
         .values({
+          tenantId: tenantIdForRes,
           service,
           date,
           slot: slotValue,

@@ -10,7 +10,8 @@ const router = Router();
 // GET /api/availability?service=Daycare&date=2025-10-10&slot=09:00-12:00
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const { service, date, slot } = req.query;
+    const { service: serviceProp, serviceType, date, slot } = req.query;
+    const service = serviceProp || serviceType;
 
     if (!service || !date) {
       return res.status(400).json({ 
