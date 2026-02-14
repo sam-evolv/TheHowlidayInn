@@ -3,6 +3,7 @@ import { db } from "../db/client";
 import { availability } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import { getEffectiveCapacity } from "../config/capacity";
+import { ensureTenant } from "../services/userService";
 
 const router = Router();
 
@@ -28,9 +29,11 @@ router.get("/", async (req: Request, res: Response) => {
       slotValue === "ALL_DAY" ? null : slotValue
     );
     
+    const tenantId = await ensureTenant();
     const [record] = await db
       .insert(availability)
       .values({
+        tenantId,
         service: service as string,
         date: date as string,
         slot: slotValue,

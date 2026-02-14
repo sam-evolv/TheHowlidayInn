@@ -57,6 +57,11 @@ export interface Dog {
   photoUrl?: string | null;
   temperamentNotes?: string | null;
   vaccinationRecordUrl?: string | null;
+  trialRequired?: boolean;
+  trialCompletedAt?: Date | string | null;
+  trialCompletedByUserId?: string | null;
+  trialNote?: string | null;
+  status?: string;
   createdAt?: Date | string;
 }
 

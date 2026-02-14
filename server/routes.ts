@@ -590,14 +590,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dogs/:dogId/trial-status', requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const dog = await storage.getDog(req.params.dogId);
-      if (!dog) {
-        return res.status(404).json({ message: 'Dog not found' });
-      }
 
       const { trialEligibility: calculateEligibility } = await import('@shared/trial');
+      const trialRequired = dog?.trialRequired ?? true;
+      const trialCompletedAt = dog?.trialCompletedAt;
       const eligibility = calculateEligibility(
-        dog.trialRequired ?? true,
-        dog.trialCompletedAt?.toISOString()
+        trialRequired,
+        trialCompletedAt ? (trialCompletedAt instanceof Date ? trialCompletedAt.toISOString() : String(trialCompletedAt)) : undefined
       );
 
       res.json({

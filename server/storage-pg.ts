@@ -140,21 +140,63 @@ export class PostgresStorage implements IStorage {
     return this.getCustomer(id);
   }
 
-  // Dog operations (stub - not needed for bookings)
+  private mapDbDog(row: any): Dog {
+    return {
+      id: row.id,
+      customerId: row.ownerId,
+      name: row.name,
+      breed: row.breed || '',
+      age: row.dob || null,
+      weight: row.weightKg || null,
+      photoUrl: row.photoUrl || null,
+      temperamentNotes: row.temperament || null,
+      vaccinationRecordUrl: row.vaccinationProofUrl || null,
+      trialRequired: row.trialRequired ?? true,
+      trialCompletedAt: row.trialCompletedAt || null,
+      trialCompletedByUserId: row.trialCompletedByUserId || null,
+      trialNote: row.trialNote || null,
+      status: row.status || 'pending',
+      createdAt: row.createdAt,
+    };
+  }
+
   async getDog(id: string): Promise<Dog | undefined> {
-    return undefined;
+    const [row] = await db.select().from(dogs).where(eq(dogs.id, id)).limit(1);
+    return row ? this.mapDbDog(row) : undefined;
   }
 
   async getDogsByCustomer(customerId: string): Promise<Dog[]> {
-    return [];
+    const rows = await db.select().from(dogs).where(eq(dogs.ownerId, customerId));
+    return rows.map(r => this.mapDbDog(r));
   }
 
   async createDog(dog: InsertDog): Promise<Dog> {
-    throw new Error("Not implemented");
+    const tenantId = await ensureTenant();
+    const id = randomUUID();
+    const [created] = await db.insert(dogs).values({
+      tenantId,
+      id,
+      ownerId: dog.customerId,
+      name: dog.name,
+      breed: dog.breed || null,
+      status: dog.status || 'pending',
+      trialRequired: dog.trialRequired ?? true,
+    }).returning();
+    return this.mapDbDog(created);
   }
 
-  async updateDog(id: string, dog: Partial<Dog>): Promise<Dog | undefined> {
-    throw new Error("Not implemented");
+  async updateDog(id: string, updates: Partial<Dog>): Promise<Dog | undefined> {
+    const dbUpdates: any = { updatedAt: new Date() };
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.breed !== undefined) dbUpdates.breed = updates.breed;
+    if (updates.photoUrl !== undefined) dbUpdates.photoUrl = updates.photoUrl;
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.trialRequired !== undefined) dbUpdates.trialRequired = updates.trialRequired;
+    if (updates.trialCompletedAt !== undefined) dbUpdates.trialCompletedAt = updates.trialCompletedAt instanceof Date ? updates.trialCompletedAt : updates.trialCompletedAt ? new Date(updates.trialCompletedAt) : null;
+    if (updates.trialCompletedByUserId !== undefined) dbUpdates.trialCompletedByUserId = updates.trialCompletedByUserId;
+    if (updates.trialNote !== undefined) dbUpdates.trialNote = updates.trialNote;
+    const [updated] = await db.update(dogs).set(dbUpdates).where(eq(dogs.id, id)).returning();
+    return updated ? this.mapDbDog(updated) : undefined;
   }
 
   async deleteDog(id: string): Promise<boolean> {
