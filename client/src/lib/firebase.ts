@@ -140,143 +140,85 @@ export const resetPassword = async (email: string) => {
   await sendPasswordResetEmail(auth, normalizedEmail);
 };
 
-// User functions
+// User functions — Firestore is optional; PostgreSQL is authoritative
 export const getUserData = async (uid: string): Promise<FirebaseUser | null> => {
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
       return { uid, ...userDoc.data() } as FirebaseUser;
     }
-  } catch (e) {
+  } catch (_e) {
     // Firestore read is optional - user data is managed in PostgreSQL
   }
   return null;
 };
 
 export const updateUserData = async (uid: string, data: Partial<FirebaseUser>) => {
-  await updateDoc(doc(db, 'users', uid), data);
+  try { await updateDoc(doc(db, 'users', uid), data); } catch (_e) { /* optional */ }
 };
 
-// Dog functions
-export const createDog = async (dogData: Omit<FirebaseDog, 'id' | 'createdAt'>) => {
-  const docRef = await addDoc(collection(db, 'dogs'), {
-    ...dogData,
-    createdAt: serverTimestamp(),
-  });
-  return docRef.id;
+// Dog functions — all data managed via PostgreSQL API; Firestore calls are stubs
+export const createDog = async (_dogData: Omit<FirebaseDog, 'id' | 'createdAt'>) => {
+  return '';
 };
 
-export const getUserDogs = async (ownerUid: string): Promise<FirebaseDog[]> => {
-  const q = query(
-    collection(db, 'dogs'),
-    where('ownerUid', '==', ownerUid),
-    orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FirebaseDog));
+export const getUserDogs = async (_ownerUid: string): Promise<FirebaseDog[]> => {
+  return [];
 };
 
-export const updateDog = async (dogId: string, data: Partial<FirebaseDog>) => {
-  await updateDoc(doc(db, 'dogs', dogId), data);
+export const updateDog = async (_dogId: string, _data: Partial<FirebaseDog>) => {};
+
+export const deleteDog = async (_dogId: string) => {};
+
+// Booking functions — all managed via PostgreSQL API; Firestore calls are stubs
+export const createBooking = async (_bookingData: Omit<FirebaseBooking, 'id' | 'createdAt'>) => {
+  return '';
 };
 
-export const deleteDog = async (dogId: string) => {
-  await deleteDoc(doc(db, 'dogs', dogId));
-};
-
-// Booking functions
-export const createBooking = async (bookingData: Omit<FirebaseBooking, 'id' | 'createdAt'>) => {
-  const docRef = await addDoc(collection(db, 'bookings'), {
-    ...bookingData,
-    createdAt: serverTimestamp(),
-  });
-  return docRef.id;
-};
-
-export const getUserBookings = async (ownerUid: string): Promise<FirebaseBooking[]> => {
-  const q = query(
-    collection(db, 'bookings'),
-    where('ownerUid', '==', ownerUid),
-    orderBy('createdAt', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FirebaseBooking));
+export const getUserBookings = async (_ownerUid: string): Promise<FirebaseBooking[]> => {
+  return [];
 };
 
 export const getAllBookings = async (): Promise<FirebaseBooking[]> => {
-  const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FirebaseBooking));
+  return [];
 };
 
-export const updateBooking = async (bookingId: string, data: Partial<FirebaseBooking>) => {
-  await updateDoc(doc(db, 'bookings', bookingId), data);
-};
+export const updateBooking = async (_bookingId: string, _data: Partial<FirebaseBooking>) => {};
 
 // Availability and capacity functions
-export const getBookingsForDate = async (date: string, serviceType?: string): Promise<FirebaseBooking[]> => {
-  let q = query(
-    collection(db, 'bookings'),
-    where('checkInDate', '<=', date),
-    where('checkOutDate', '>=', date),
-    where('status', 'in', ['paid', 'confirmed'])
-  );
-  
-  const querySnapshot = await getDocs(q);
-  let bookings = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FirebaseBooking));
-  
-  if (serviceType) {
-    bookings = bookings.filter(booking => booking.serviceType === serviceType);
-  }
-  
-  return bookings;
+// These no longer depend on Firestore — data lives in PostgreSQL.
+// Returning safe defaults to avoid Firestore permission errors.
+
+export const getBookingsForDate = async (_date: string, _serviceType?: string): Promise<FirebaseBooking[]> => {
+  return [];
 };
 
 export const getDailyCapacity = async (): Promise<{ daycare: number; boarding: number }> => {
-  const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
-  if (settingsDoc.exists()) {
-    const data = settingsDoc.data();
-    return data.dailyCapByService || { daycare: 40, boarding: 20 };
-  }
   return { daycare: 40, boarding: 20 };
 };
 
-// Breed validation
+// Breed validation — uses hardcoded list (no Firestore dependency)
+const BLOCKED_BREEDS = [
+  "pit bull", "american pit bull terrier", "staffordshire bull terrier",
+  "american staffordshire terrier", "bull terrier", "rottweiler",
+  "doberman pinscher", "german shepherd", "mastiff", "akita",
+  "chow chow", "wolf hybrid", "presa canario", "cane corso"
+];
+
 export const getAcceptedBreeds = async (): Promise<string[]> => {
-  const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
-  if (settingsDoc.exists()) {
-    return settingsDoc.data().acceptedBreeds || [];
-  }
   return [];
 };
 
 export const getBlockedBreeds = async (): Promise<string[]> => {
-  const settingsDoc = await getDoc(doc(db, 'settings', 'global'));
-  if (settingsDoc.exists()) {
-    return settingsDoc.data().blockedBreeds || [
-      "pit bull", "american pit bull terrier", "staffordshire bull terrier",
-      "american staffordshire terrier", "bull terrier", "rottweiler",
-      "doberman pinscher", "german shepherd", "mastiff", "akita",
-      "chow chow", "wolf hybrid", "presa canario", "cane corso"
-    ];
-  }
-  return [
-    "pit bull", "american pit bull terrier", "staffordshire bull terrier",
-    "american staffordshire terrier", "bull terrier", "rottweiler",
-    "doberman pinscher", "german shepherd", "mastiff", "akita",
-    "chow chow", "wolf hybrid", "presa canario", "cane corso"
-  ];
+  return BLOCKED_BREEDS;
 };
 
 export const isBreedRestricted = async (breed: string): Promise<boolean> => {
-  const blockedBreeds = await getBlockedBreeds();
-  return blockedBreeds.some(blocked => breed.toLowerCase().includes(blocked.toLowerCase()));
+  return BLOCKED_BREEDS.some(blocked => breed.toLowerCase().includes(blocked.toLowerCase()));
 };
 
 // Helper function for existing compatibility
-export const checkCustomerStatus = async (email: string) => {
-  // Check if user exists
-  const q = query(collection(db, 'users'), where('email', '==', email), limit(1));
-  const querySnapshot = await getDocs(q);
-  return { isFirstTime: querySnapshot.empty };
+// No longer queries Firestore — the server-side trial gating handles first-time checks
+export const checkCustomerStatus = async (_email: string) => {
+  return { isFirstTime: false };
 };
