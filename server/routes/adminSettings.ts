@@ -3,6 +3,7 @@ import { db } from '../db/client';
 import { settings as tblSettings, bookings } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { requireOwnerAuth } from '../auth/session';
+import { ensureTenant } from '../services/userService';
 
 const router = Router();
 
@@ -24,9 +25,11 @@ async function getRevenueOffsets() {
 }
 
 async function updateRevenueOffsets(offsets: { all: number; byDay: Record<string, number> }) {
+  const tenantId = await ensureTenant();
   await db
     .insert(tblSettings)
     .values({
+      tenantId,
       requiredVaccines: [],
       prohibitedBreeds: [],
       revenueOffsets: offsets

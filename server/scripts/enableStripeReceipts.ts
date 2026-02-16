@@ -20,7 +20,7 @@ async function enableReceipts() {
       } as any
     );
 
-    console.log("✅ Stripe receipts enabled:", account.settings?.email?.receipts);
+    console.log("✅ Stripe receipts enabled:", (account.settings as any)?.email?.receipts);
   } catch (err) {
     console.error("❌ Failed to enable receipts:", err);
   }

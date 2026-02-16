@@ -45,6 +45,9 @@ export default function VaccinationStatus({ dog, className = "" }: VaccinationSt
 
   const allValid = vaccinationStatus.length > 0 && vaccinationStatus.every((v: any) => v.isValid);
   const someValid = vaccinationStatus.some((v: any) => v.isValid);
+  const isRabiesValid = vaccinationStatus.find((v: any) => v.type === "rabies")?.isValid ?? false;
+  const isDhppValid = vaccinationStatus.find((v: any) => v.type === "dhpp")?.isValid ?? false;
+  const isBordetellaValid = vaccinationStatus.find((v: any) => v.type === "kennel_cough")?.isValid ?? false;
 
   const getOverallStatus = () => {
     if (allValid) return { status: 'complete', icon: CheckCircle, color: 'bg-green-100 text-green-800 border-green-200' };

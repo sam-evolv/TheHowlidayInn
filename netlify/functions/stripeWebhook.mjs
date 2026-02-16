@@ -1,22 +1,20 @@
 // Netlify Function - Stripe Webhook Handler
 import Stripe from 'stripe';
-import { initializeApp, cert } from 'firebase-admin/app';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Initialize Firebase Admin (use service account key from environment)
-let firebaseApp;
-try {
-  firebaseApp = initializeApp({
-    // In production, set FIREBASE_SERVICE_ACCOUNT_KEY environment variable
-    // For now, initialize with minimal config - will need proper setup
-  });
-} catch (error) {
-  console.error('Firebase initialization error:', error);
+function getDb() {
+  if (!getApps().length) {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountJson) {
+      throw new Error('Missing FIREBASE_SERVICE_ACCOUNT_KEY');
+    }
+    initializeApp({ credential: cert(JSON.parse(serviceAccountJson)) });
+  }
+  return getFirestore();
 }
-
-const db = getFirestore();
 
 export const handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
@@ -42,13 +40,14 @@ export const handler = async (event, context) => {
   }
 
   try {
+    const db = getDb();
     switch (stripeEvent.type) {
       case 'checkout.session.completed':
-        await handleCheckoutCompleted(stripeEvent.data.object);
+        await handleCheckoutCompleted(db, stripeEvent.data.object);
         break;
       
       case 'checkout.session.expired':
-        await handleCheckoutExpired(stripeEvent.data.object);
+        await handleCheckoutExpired(db, stripeEvent.data.object);
         break;
       
       default:
@@ -69,7 +68,7 @@ export const handler = async (event, context) => {
   }
 };
 
-async function handleCheckoutCompleted(session) {
+async function handleCheckoutCompleted(db, session) {
   const { bookingId, serviceType } = session.metadata;
   
   if (!bookingId) {
@@ -118,7 +117,7 @@ async function handleCheckoutCompleted(session) {
   }
 }
 
-async function handleCheckoutExpired(session) {
+async function handleCheckoutExpired(db, session) {
   const { bookingId } = session.metadata;
   
   if (!bookingId) {

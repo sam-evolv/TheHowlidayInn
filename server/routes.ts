@@ -28,6 +28,7 @@ import { getUncachableResendClient } from "./lib/resendClient.js";
 import { db } from "./db/client";
 import { users, dogs, vaccinations, healthProfiles, settings } from "./db/schema";
 import { eq, desc } from "drizzle-orm";
+import { ensureTenant } from "./services/userService";
 
 // Legacy Stripe initialization - Use getStripe() factory for safer initialization
 let stripe: Stripe | null = null;
@@ -614,7 +615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Mark trial as completed for a dog
   app.post('/api/admin/dogs/:dogId/trial/complete', requireOwnerAuth, async (req, res) => {
     try {
-      const userId = req.session?.userId;
+      const userId = (req as any).session?.userId;
 
       const dog = await storage.getDog(req.params.dogId);
       if (!dog) {
@@ -1406,7 +1407,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!updated) {
         // Row doesn't exist yet — insert it
+        const tenantId = await ensureTenant();
         const [inserted] = await db.insert(settings).values({
+          tenantId,
           ...validatedData,
           requiredVaccines: validatedData.requiredVaccines ?? [],
           prohibitedBreeds: validatedData.prohibitedBreeds ?? [],

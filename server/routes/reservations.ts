@@ -6,8 +6,6 @@ import { getCapacityForService, getReservationTTLMinutes } from "../config/capac
 import { createReservationSchema, createPaymentIntentSchema } from "../../shared/schema";
 import { v4 as uuidv4 } from "uuid";
 import { createPaymentIntent } from "../lib/stripeWrapper";
-import type { PgTransaction } from "drizzle-orm/pg-core";
-import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import { getDailyWindows, isClosed, isWeekend } from "../../shared/hoursPolicy";
 import { requireAuth } from "../middleware/auth";
 import { ensureTenant } from "../services/userService";
@@ -80,7 +78,7 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
     }
 
     // Start transaction - we need atomic operations
-    const result = await db.transaction(async (tx: PgTransaction<NodePgQueryResultHKT, Record<string, never>, any>) => {
+    const result = await db.transaction(async (tx) => {
       // Build availability query conditions
       const conditions = [
         eq(availability.service, service),
@@ -296,7 +294,7 @@ router.post("/:id/release", requireAuth, async (req: Request, res: Response) => 
     }
 
     // Transaction to mark as released and decrement reserved
-    await db.transaction(async (tx: PgTransaction<NodePgQueryResultHKT, Record<string, never>, any>) => {
+    await db.transaction(async (tx) => {
       // Mark reservation as released
       await tx
         .update(reservations)
