@@ -71,7 +71,7 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 max-w-6xl mx-auto">
-            <div className="card card-hover rounded-lg p-6 sm:p-8 transition shadow-sm hover:shadow-md hover:-translate-y-[2px]" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
+            <div className="card card-hover rounded-lg p-6 sm:p-8 transition shadow-sm hover:shadow-md hover:-translate-y-[2px] flex flex-col h-full" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
               <div className="flex justify-center mb-4">
                 <FeatureIcon icon={Sun} variant="coin" />
               </div>
@@ -85,7 +85,7 @@ export default function Home() {
                 <li>• Drop off 8am-10am, Collection 4pm-6pm</li>
               </ul>
               <Button 
-                className="btn-primary btn-premium focus-premium min-h-[44px]"
+                className="btn-primary btn-premium focus-premium min-h-[44px] mt-auto self-start"
                 onClick={() => setLocation("/daycare")}
                 data-testid="button-daycare-service"
               >
@@ -93,7 +93,7 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="card card-hover rounded-lg p-6 sm:p-8 transition shadow-sm hover:shadow-md hover:-translate-y-[2px]" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
+            <div className="card card-hover rounded-lg p-6 sm:p-8 transition shadow-sm hover:shadow-md hover:-translate-y-[2px] flex flex-col h-full" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
               <div className="flex justify-center mb-4">
                 <FeatureIcon icon={HomeIcon} variant="coin" />
               </div>
@@ -110,7 +110,7 @@ export default function Home() {
                 <li>• Photos and updates will be sent when possible</li>
               </ul>
               <Button 
-                className="btn-primary btn-premium focus-premium min-h-[44px]"
+                className="btn-primary btn-premium focus-premium min-h-[44px] mt-auto self-start"
                 onClick={() => setLocation("/boarding")}
                 data-testid="button-boarding-service"
               >
@@ -118,7 +118,7 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="rounded-lg p-6 sm:p-8 md:col-span-2 lg:col-span-1 transition shadow-sm hover:shadow-md hover:-translate-y-[2px]" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
+            <div className="rounded-lg p-6 sm:p-8 md:col-span-2 lg:col-span-1 transition shadow-sm hover:shadow-md hover:-translate-y-[2px] flex flex-col h-full" style={{ background: '#FFFFFF', border: '1px solid var(--hi-border)' }}>
               <div className="flex justify-center mb-4">
                 <FeatureIcon icon={Zap} variant="coin" />
               </div>
@@ -131,7 +131,7 @@ export default function Home() {
                 <li>• Assessment of your dog's temperament</li>
               </ul>
               <Button 
-                className="btn-primary btn-premium focus-premium min-h-[44px]"
+                className="btn-primary btn-premium focus-premium min-h-[44px] mt-auto self-start"
                 onClick={() => setLocation("/trial")}
                 data-testid="button-trial-service"
               >
