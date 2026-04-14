@@ -10,11 +10,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, CalendarCheck, AlertTriangle, CreditCard, Gift } from "lucide-react";
 import { insertBookingSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { api } from "@/lib/api";
 import { isBreedRestricted, checkCustomerStatus } from "@/lib/firebase";
+import { isBannedBreed } from "@/constants/dogs";
 import { AGE_OPTIONS, SERVICE_TYPES } from "@/lib/constants";
 import { getDailyWindows, isClosed, getClosedMessage } from "@shared/hoursPolicy";
 import { PRICES } from "@shared/pricing";
@@ -171,6 +173,9 @@ export default function Daycare() {
       });
     },
   });
+
+  // Track breed for real-time restriction feedback
+  const watchedBreed = form.watch('breed');
 
   // Track selected date for availability checking (MUST be before conditional returns)
   const selectedDate = form.watch('serviceDate');
@@ -338,6 +343,14 @@ export default function Daycare() {
                     disabled={isSubmitting}
                     className="mb-6"
                   />
+                  {watchedBreed && isBannedBreed(watchedBreed) && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Unfortunately, {watchedBreed} cannot be accommodated due to insurance restrictions.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
 
                 {/* Contact Information */}
