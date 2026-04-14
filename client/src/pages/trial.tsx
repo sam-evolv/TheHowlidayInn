@@ -468,11 +468,12 @@ export default function Trial() {
                           <FormItem>
                             <FormLabel>Preferred Date (Mon-Fri Only) *</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="date" 
-                                min={today} 
+                              <Input
+                                type="date"
+                                min={today}
                                 {...field}
                                 className={isWeekendDay ? "border-red-500" : ""}
+                                data-testid="input-trial-date"
                               />
                             </FormControl>
                             {isWeekendDay && (

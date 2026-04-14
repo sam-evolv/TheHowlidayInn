@@ -10,11 +10,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Bed, AlertTriangle, CreditCard, Gift } from "lucide-react";
 import { insertBookingSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { api } from "@/lib/api";
 import { isBreedRestricted, checkCustomerStatus } from "@/lib/firebase";
+import { isBannedBreed } from "@/constants/dogs";
 import { AGE_OPTIONS, SERVICE_TYPES } from "@/lib/constants";
 import { getDailyWindows, isClosed, getClosedMessage } from "@shared/hoursPolicy";
 import { PRICES, isPmLabel } from "@shared/pricing";
@@ -114,6 +116,9 @@ export default function Boarding() {
       status: "pending",
     },
   });
+
+  // Track breed for real-time restriction feedback
+  const watchedBreed = form.watch('breed');
 
   // Track selected check-in date, checkout date, and kennel size (MUST be before early returns)
   const checkinDate = form.watch('checkinDate');
@@ -418,6 +423,14 @@ export default function Boarding() {
                     disabled={isSubmitting}
                     className="mb-6"
                   />
+                  {watchedBreed && isBannedBreed(watchedBreed) && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Unfortunately, {watchedBreed} cannot be accommodated due to insurance restrictions.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
 
                 {/* Contact Information */}
@@ -498,7 +511,7 @@ export default function Boarding() {
                         <FormItem data-invalid={!!fieldState.error}>
                           <FormLabel>Check-in Date *</FormLabel>
                           <FormControl>
-                            <Input type="date" min={today} {...field} />
+                            <Input type="date" min={today} {...field} data-testid="input-checkin-date" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -511,7 +524,7 @@ export default function Boarding() {
                         <FormItem data-invalid={!!fieldState.error}>
                           <FormLabel>Check-out Date *</FormLabel>
                           <FormControl>
-                            <Input type="date" min={today} {...field} />
+                            <Input type="date" min={today} {...field} data-testid="input-checkout-date" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -528,13 +541,13 @@ export default function Boarding() {
                         return (
                           <FormItem data-invalid={!!fieldState.error}>
                             <FormLabel>Check-in Time *</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
+                            <Select
+                              onValueChange={field.onChange}
                               value={field.value}
                               disabled={!checkinDate}
                             >
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger data-testid="select-checkin-time">
                                   <SelectValue placeholder={
                                     !checkinDate 
                                       ? "Select a date first" 
@@ -569,13 +582,13 @@ export default function Boarding() {
                         return (
                           <FormItem data-invalid={!!fieldState.error}>
                             <FormLabel>Check-out Time *</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
+                            <Select
+                              onValueChange={field.onChange}
                               value={field.value}
                               disabled={!checkoutDate}
                             >
                               <FormControl>
-                                <SelectTrigger>
+                                <SelectTrigger data-testid="select-checkout-time">
                                   <SelectValue placeholder={
                                     !checkoutDate 
                                       ? "Select a date first" 
