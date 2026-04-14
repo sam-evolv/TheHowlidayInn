@@ -1,8 +1,7 @@
-// TODO HowlidayInn: User profile management API routes
 import { Router } from "express";
 import { db } from "../db/client";
-import { users, settings as tblSettings } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { users, bookings, settings as tblSettings } from "../db/schema";
+import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth";
 import type { AuthenticatedRequest } from "../middleware/auth";
 
@@ -11,9 +10,8 @@ export const usersRouter = Router();
 // GET current user profile
 usersRouter.get("/api/me", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    console.log("GET /api/me uid:", req.user!.uid);
     const uid = req.user!.uid;
-    
+
     // Fetch user from database
     const user = await db.select({
       id: users.id,
@@ -26,7 +24,6 @@ usersRouter.get("/api/me", requireAuth, async (req: AuthenticatedRequest, res) =
     }).from(users).where(eq(users.id, uid));
     
     if (user.length === 0) {
-      console.log("User not found in database:", uid);
       return res.status(404).json({ message: "User not found" });
     }
     
@@ -97,7 +94,6 @@ usersRouter.patch("/api/me", requireAuth, async (req: AuthenticatedRequest, res)
 
     await db.update(users).set(updateData).where(eq(users.id, uid));
 
-    console.log("Profile updated for user:", uid, "name:", name);
     res.json({ ok: true, message: "Profile updated successfully" });
   } catch (err: any) {
     console.error("PATCH /api/me error:", err);
@@ -105,21 +101,33 @@ usersRouter.patch("/api/me", requireAuth, async (req: AuthenticatedRequest, res)
   }
 });
 
-// POST mark trial as completed - TODO: integrate with proper booking system
+// POST mark trial as completed - requires a paid trial booking
 usersRouter.post("/api/me/complete-trial", requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
     const uid = req.user!.uid;
-    
-    // TODO: Add booking verification once PostgreSQL bookings table is created
-    // For now, allow trial completion after Stripe payment success
-    
+
+    // Verify user has a confirmed/paid trial booking before allowing completion
+    const trialBooking = await db.select().from(bookings).where(
+      and(
+        eq(bookings.userId, uid),
+        eq(bookings.serviceType, 'trial'),
+        eq(bookings.paymentStatus, 'paid')
+      )
+    ).limit(1);
+
+    if (trialBooking.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        message: "No paid trial booking found. Please complete and pay for a trial day first."
+      });
+    }
+
     // Update user's completedTrial status
-    await db.update(users).set({ 
-      completedTrial: true 
+    await db.update(users).set({
+      completedTrial: true
     }).where(eq(users.id, uid));
-    
-    console.log("Trial completed for user:", uid);
-    res.json({ 
+
+    res.json({
       ok: true,
       completedTrial: true,
       message: "Trial successfully completed"

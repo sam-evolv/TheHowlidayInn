@@ -15,7 +15,6 @@ export const adminDogsRouter = Router();
 adminDogsRouter.get("/api/admin/dogs", requireOwnerAuth, async (req: any, res: any) => {
   try {
     const { status, owner, breed, q, expiringInDays } = req.query;
-    console.log("GET /api/admin/dogs admin:", req.user?.email || req.user?.uid, "filters:", { status, owner, breed, q, expiringInDays });
     
     // Build query with JOIN to include owner information
     const statusFilter = status || 'all';
@@ -53,7 +52,6 @@ adminDogsRouter.get("/api/admin/dogs", requireOwnerAuth, async (req: any, res: a
     const rows = statusFilter !== 'all' 
       ? await queryBuilder.where(eq(dogs.status, statusFilter))
       : await queryBuilder;
-    console.log("GET /api/admin/dogs result: count =", rows.length, "for admin", req.user?.email || req.user?.uid, "status filter:", statusFilter);
     res.json(rows);
   } catch (error) {
     console.error("GET /api/admin/dogs error:", error);

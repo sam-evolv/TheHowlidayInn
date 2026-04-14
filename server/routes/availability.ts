@@ -14,10 +14,21 @@ router.get("/", async (req: Request, res: Response) => {
     const service = serviceProp || serviceType;
 
     if (!service || !date) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "service and date are required" 
+      return res.status(400).json({
+        success: false,
+        error: "service and date are required"
       });
+    }
+
+    // Validate date format (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date as string)) {
+      return res.status(400).json({ success: false, error: "Invalid date format. Use YYYY-MM-DD" });
+    }
+
+    // Validate service is a known type
+    const validServices = ['daycare', 'boarding:small', 'boarding:large', 'trial'];
+    if (!validServices.includes((service as string).toLowerCase())) {
+      return res.status(400).json({ success: false, error: "Invalid service type" });
     }
 
     // Upsert: create if not exists, otherwise return existing record

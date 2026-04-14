@@ -56,12 +56,7 @@ router.post("/create-intent-by-booking", requireAuth, async (req, res) => {
       description: "Howliday Inn booking",
     });
 
-    console.log("📧 PaymentIntent created:", {
-      id: intent.id,
-      receipt_email: intent.receipt_email,
-      metadata: intent.metadata,
-      status: intent.status,
-    });
+    console.log("[checkout] PaymentIntent created:", intent.id);
 
     if (email) {
       await sendConfirmationEmail(email, body.bookingId, amount);

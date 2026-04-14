@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import compression from "compression";
@@ -142,7 +143,7 @@ app.use(demoRoute);
 import fs from 'fs';
 import path from 'path';
 
-const BYPASS_TOKEN = process.env.MAINTENANCE_BYPASS_TOKEN || 'letmein-123';
+const BYPASS_TOKEN = process.env.MAINTENANCE_BYPASS_TOKEN || crypto.randomUUID();
 const MAINT_FILE = '.maintenance';
 
 function getMaintState(): 'on' | 'off' {
@@ -179,7 +180,7 @@ app.get('/_maint/on', (req, res) => {
     return res.status(401).send('Unauthorized');
   }
   setMaintState(true);
-  res.type('text').send('✅ Maintenance mode: ON\n\nPublic now sees: /public/maintenance.html\n\nBypass: add ?admin=' + BYPASS_TOKEN + ' to URL');
+  res.type('text').send('✅ Maintenance mode: ON\n\nPublic now sees maintenance page.');
 });
 
 app.get('/_maint/off', (req, res) => {
@@ -599,8 +600,17 @@ async function sendWebhookBookingReceipt(bookingId: string) {
   }
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+
+// Security headers
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -65,7 +65,7 @@ export default function CancelPage() {
               
               <Button 
                 variant="outline" 
-                onClick={() => setLocation('/dashboard')} 
+                onClick={() => setLocation('/account')}
                 className="w-full"
                 data-testid="button-view-bookings"
               >

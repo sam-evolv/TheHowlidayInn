@@ -72,8 +72,6 @@ export async function requireAuth(req: AuthenticatedRequest, res: Response, next
     console.error('auth middleware: verifyIdToken failed', { code, detail });
     res.status(401).json({
       message: 'Invalid authentication token',
-      firebaseError: code,
-      detail,
     });
   }
 }

@@ -2,12 +2,17 @@ import { Router } from 'express';
 import Stripe from 'stripe';
 import type { Request, Response } from 'express';
 import bodyParser from 'body-parser';
+import rateLimit from 'express-rate-limit';
 import { db } from '../db/client';
 import { bookings } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+// Rate limit payment endpoints: 10 requests per 15 minutes per IP
+const paymentLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, message: { error: 'Too many payment requests, please try again later' } });
+router.use('/checkout', paymentLimiter);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-11-20.acacia' as any,
@@ -39,9 +44,15 @@ router.post('/checkout', requireAuth, async (req: Request, res: Response) => {
 
     // Look up booking to get server-verified price and details
     const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1);
-    
+
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    // Verify the authenticated user owns this booking
+    const authUser = (req as any).user;
+    if (booking.userId && authUser?.uid && booking.userId !== authUser.uid) {
+      return res.status(403).json({ error: 'Not authorized to pay for this booking' });
     }
 
     const origin = getOrigin(req);
@@ -181,17 +192,17 @@ router.get('/verify', async (req: Request, res: Response) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['payment_intent'] });
     const paid = session.payment_status === 'paid';
     const meta = session.metadata || {};
-    
+
     // AUTO_TRIAL_MARK: Also handle trial completion in verify endpoint (fallback if webhook was delayed)
     if (paid && process.env.AUTO_TRIAL_MARK === 'true' && meta.service === 'trial' && meta.dogId && meta.date) {
       const { storage } = await import('../storage');
       const dog = await storage.getDog(meta.dogId);
-      
+
       // Only mark if not already marked
       if (dog && (dog as any).trialRequired) {
         const trialDate = new Date(meta.date);
         trialDate.setHours(17, 59, 59, 0);
-        
+
         try {
           await storage.updateDog(meta.dogId, {
             trialRequired: false,
@@ -205,8 +216,13 @@ router.get('/verify', async (req: Request, res: Response) => {
         }
       }
     }
-    
-    return res.json({ paid, metadata: meta, sessionId });
+
+    // Only expose non-sensitive metadata fields to the client
+    const safeMeta: Record<string, string> = {};
+    if (meta.service) safeMeta.service = meta.service;
+    if (meta.bookingId) safeMeta.bookingId = meta.bookingId;
+
+    return res.json({ paid, metadata: safeMeta, sessionId });
   } catch (err: any) {
     console.error('VERIFY ERROR:', err?.message || err);
     return res.status(500).json({ paid: false, error: 'verify-failed' });

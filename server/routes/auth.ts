@@ -11,6 +11,7 @@ authRouter.use(cookieParser());
 
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30 });
 authRouter.use("/login", limiter);
+authRouter.use("/change-password", limiter);
 
 authRouter.get("/me", async (req, res) => {
   const session = getAuth(req);
@@ -25,27 +26,20 @@ authRouter.post("/login", async (req, res) => {
       password: z.string().min(8),
     }).parse(req.body);
 
-    console.log("[auth] Login attempt for email:", body.email);
-    
     const owner = await getOwner();
-    console.log("[auth] Owner found:", owner ? `${owner.email} (has password: ${!!owner.passwordHash})` : "null");
-    
+
     if (!owner || owner.email.toLowerCase() !== body.email.toLowerCase()) {
-      console.log("[auth] Login failed: owner not found or email mismatch");
       return res.status(401).json({ error: "invalid_credentials" });
     }
-    
+
     if (!owner.passwordHash) {
-      console.log("[auth] Login failed: no password hash");
       return res.status(401).json({ error: "invalid_credentials" });
     }
-    
+
     const ok = await argon2.verify(owner.passwordHash, body.password);
-    console.log("[auth] Password verification:", ok ? "SUCCESS" : "FAILED");
     if (!ok) return res.status(401).json({ error: "invalid_credentials" });
 
     setSessionCookie(res, { id: owner.id, email: owner.email, name: owner.name, role: "owner" }, req);
-    console.log("[auth] Login successful for:", owner.email);
     return res.json({ ok: true });
   } catch (error) {
     console.error("[auth] Login error:", error);

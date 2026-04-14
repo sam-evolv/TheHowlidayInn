@@ -19,9 +19,7 @@ export const dogsRouter = Router();
 dogsRouter.get("/api/me/dogs", requireAuth, async (req: any, res) => {
   try {
     const myId = req.user.uid;
-    console.log("GET /api/me/dogs uid:", myId, "email:", req.user?.email || 'unknown');
     const rows = await db.select().from(dogs).where(eq(dogs.ownerId, myId));
-    console.log("GET /api/me/dogs result: count =", rows.length, "for user", req.user?.email || myId);
     res.json(rows);
   } catch (err: any) {
     console.error("GET /api/me/dogs error:", err);
@@ -32,7 +30,6 @@ dogsRouter.get("/api/me/dogs", requireAuth, async (req: any, res) => {
 // POST create dog for DogWizard - expects { dog: data } format
 dogsRouter.post("/api/me/dogs", requireAuth, async (req: any, res) => {
   try {
-    console.log("POST /api/me/dogs uid:", req.user.uid, "email:", req.user?.email || 'unknown', "payload:", JSON.stringify(req.body));
     const myId = req.user.uid;
     
     // Extract dog data from wrapped format
@@ -74,7 +71,6 @@ dogsRouter.post("/api/me/dogs", requireAuth, async (req: any, res) => {
     };
     
     const [created] = await db.insert(dogs).values([row]).returning();
-    console.log("INSERT /api/me/dogs ok:", { id: created.id, ownerId: created.ownerId, name: created.name });
     res.status(201).json(created);
   } catch (err: any) {
     console.error("POST /api/me/dogs error:", err);
@@ -96,7 +92,6 @@ dogsRouter.post("/api/me/dogs", requireAuth, async (req: any, res) => {
 // POST create dog - simplified route per spec
 dogsRouter.post("/api/dogs", requireAuth, async (req: any, res) => {
   try {
-    console.log("POST /api/dogs uid:", req.user.uid, "email:", req.user?.email || 'unknown', "payload:", JSON.stringify(req.body));
     const myId = req.user.uid;
     
     // Validate request body with Zod schema
@@ -138,7 +133,6 @@ dogsRouter.post("/api/dogs", requireAuth, async (req: any, res) => {
     };
     
     const [created] = await db.insert(dogs).values([row]).returning();
-    console.log("INSERT /api/dogs ok:", { id: created.id, ownerId: created.ownerId, name: created.name });
     res.status(201).json(created);
   } catch (err: any) {
     console.error("POST /api/dogs error:", err);
@@ -172,6 +166,9 @@ dogsRouter.delete("/api/me/dogs/:id", requireAuth, async (req: any, res) => {
       return res.status(404).json({ error: "Dog not found" });
     }
     
+    // Delete related records first (cascading delete)
+    await db.delete(vaccinations).where(eq(vaccinations.dogId, id));
+    await db.delete(healthProfiles).where(eq(healthProfiles.dogId, id));
     await db.delete(dogs).where(eq(dogs.id, id));
     res.json({ ok: true });
   } catch (error) {
@@ -326,29 +323,25 @@ dogsRouter.get("/api/me/dogs/:id/health", requireAuth, async (req: any, res) => 
     const rows = await db.select().from(healthProfiles).where(eq(healthProfiles.dogId, id)).limit(1);
     res.json(rows[0] || {});
   } catch (error: any) {
-    console.error('[health-get] ERROR:', error?.message || error, "code:", error?.code);
-    res.status(500).json({ error: "Failed to fetch health profile", message: error?.message || String(error) });
+    console.error('[health-get] ERROR:', error?.message || error);
+    res.status(500).json({ error: "Failed to fetch health profile" });
   }
 });
 
 // PATCH health
 dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) => {
   const { id } = req.params;
-  console.log("[health-save] START dogId:", id, "uid:", req.user?.uid, "body-keys:", Object.keys(req.body || {}));
   try {
     const myId = req.user.uid;
 
     // Step 1: verify dog ownership
     const [d] = await db.select().from(dogs).where(and(eq(dogs.id, id), eq(dogs.ownerId, myId))).limit(1);
     if (!d) {
-      console.log("[health-save] dog not found for uid:", myId, "dogId:", id);
       return res.sendStatus(404);
     }
-    console.log("[health-save] dog found:", d.name);
 
     // Step 2: validate request body
     const healthData = healthProfileUpsertSchema.parse(req.body || {});
-    console.log("[health-save] zod parse OK, keys:", Object.keys(healthData));
 
     // Step 3: remove frontend-only fields that don't exist in database
     const { accuracyConfirmation, emergencyTreatmentConsent, ...dbHealthData } = healthData;
@@ -356,15 +349,11 @@ dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) =
     // Step 4: upsert health profile
     const existingRows = await db.select().from(healthProfiles).where(eq(healthProfiles.dogId, id)).limit(1);
     if (existingRows.length > 0) {
-      console.log("[health-save] updating existing profile");
       await db.update(healthProfiles).set({ ...dbHealthData, updatedAt: new Date() }).where(eq(healthProfiles.dogId, id));
     } else {
-      console.log("[health-save] inserting new profile");
       const tenantId = await ensureTenant();
       await db.insert(healthProfiles).values({ tenantId, dogId: id, ...dbHealthData });
     }
-
-    console.log("[health-save] SUCCESS");
     res.json({ ok: true });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -374,9 +363,6 @@ dogsRouter.patch("/api/me/dogs/:id/health", requireAuth, async (req: any, res) =
     console.error("[health-save] ERROR:", error?.message || error, "code:", error?.code, "detail:", error?.detail);
     res.status(500).json({
       error: "Failed to save health profile",
-      message: error?.message || String(error),
-      code: error?.code,
-      detail: error?.detail,
     });
   }
 });

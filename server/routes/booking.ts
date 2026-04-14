@@ -1,6 +1,7 @@
 // TODO HowlidayInn: Booking validation and Stripe integration with dog eligibility
 
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "../db/client";
 import { dogs, vaccinations, settings as tblSettings } from "../db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
@@ -9,6 +10,10 @@ import { requireAuth } from "../middleware/auth";
 import { createPaymentIntent } from "../lib/stripeWrapper";
 
 export const bookingRouter = Router();
+
+// Rate limit payment intent creation: 10 requests per 15 minutes per IP
+const intentLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, message: { error: 'Too many payment requests, please try again later' } });
+bookingRouter.use("/api/checkout/create-intent", intentLimiter);
 
 // REMOVED: Insecure client-amount payment endpoints (lines moved to server-side pricing below)
 // All payment intents MUST use server-calculated pricing via /api/checkout/create-intent
@@ -84,9 +89,8 @@ bookingRouter.get("/api/booking/capacity", async (req: any, res) => {
     });
   } catch (error: any) {
     console.error("Capacity check error:", error);
-    res.status(500).json({ 
-      error: "Failed to check capacity",
-      details: error.message 
+    res.status(500).json({
+      error: "Failed to check capacity"
     });
   }
 });

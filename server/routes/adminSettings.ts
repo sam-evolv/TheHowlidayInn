@@ -106,8 +106,8 @@ router.post('/restricted-breeds', requireOwnerAuth, async (req, res) => {
   try {
     const { breed } = req.body || {};
     
-    if (!breed || typeof breed !== 'string' || !breed.trim()) {
-      return res.status(400).json({ success: false, error: 'missing_breed' });
+    if (!breed || typeof breed !== 'string' || !breed.trim() || breed.trim().length > 100) {
+      return res.status(400).json({ success: false, error: 'missing_or_invalid_breed' });
     }
     
     const settings = await db.query.settings.findFirst({ where: eq(tblSettings.id, 1) });

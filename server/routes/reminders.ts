@@ -84,7 +84,7 @@ remindersRouter.put('/api/reminders/settings', requireOwnerAuth, async (req: any
 
 remindersRouter.get('/api/reminders/history', requireOwnerAuth, async (req: any, res) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 50;
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 500);
     const history = await db
       .select()
       .from(reminders)
