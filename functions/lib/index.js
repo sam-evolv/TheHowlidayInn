@@ -1,5 +1,4 @@
-// Export proxy function for API requests to Replit backend
-export { api } from './proxy.js';
+// Legacy Firebase Functions index — proxy removed (now using Netlify Functions)
 // TODO: Re-enable web and sweepReservations functions after fixing build errors
 // import { onRequest } from "firebase-functions/v2/https";
 // import { onSchedule } from "firebase-functions/v2/scheduler";

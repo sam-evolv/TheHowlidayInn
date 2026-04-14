@@ -95,7 +95,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-// trust Replit's proxy so HTTPS is detected
+// trust proxy so X-Forwarded-Proto is respected
 app.set('trust proxy', 1);
 
 // CORS middleware — must be before routes
@@ -114,11 +114,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// one origin: https + www (only for custom domain, skip Replit/API)
+// one origin: https + www (only for custom domain, skip API paths)
 app.use((req, res, next) => {
   const host = req.headers.host || '';
-  // Skip redirect for Replit domain and API paths — Replit handles its own TLS
-  if (host.includes('.replit.app') || host.includes('.repl.co') || req.path.startsWith('/api/')) {
+  // Skip redirect for API paths
+  if (req.path.startsWith('/api/')) {
     return next();
   }
   const isHttps = req.headers['x-forwarded-proto'] === 'https';

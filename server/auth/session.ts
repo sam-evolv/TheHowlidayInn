@@ -14,7 +14,7 @@ export function setSessionCookie(res: Response, payload: object, req?: Request) 
   res.cookie(COOKIE, token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'none',  // Required for cross-origin (Netlify frontend -> Replit backend)
+    sameSite: 'lax',
     path: '/',
     // Do not set domain - browser will use current host
   });
