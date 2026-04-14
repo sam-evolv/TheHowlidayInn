@@ -98,7 +98,7 @@ async function handleCheckoutCompleted(db, session) {
     // Increment capacity for the booking date
     const date = bookingData.date;
     if (date) {
-      await incrementCapacity(date, serviceType);
+      await incrementCapacity(db, date, serviceType);
     }
 
     // Send confirmation email
@@ -138,7 +138,7 @@ async function handleCheckoutExpired(db, session) {
   }
 }
 
-async function incrementCapacity(date, serviceType) {
+async function incrementCapacity(db, date, serviceType) {
   const capacityRef = db.collection('capacity').doc(date);
   const field = serviceType === 'daycare' ? 'bookedDaycare' : 'bookedBoarding';
   
