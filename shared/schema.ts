@@ -33,7 +33,9 @@ export const insertBookingSchema = z.object({
   weight: z.number().positive().optional(),
   ownerName: z.string().min(1, "Owner name is required"),
   email: z.string().email("Valid email required"),
-  phone: z.string().min(1, "Phone number is required"),
+  phone: z.string()
+    .min(1, "Phone number is required")
+    .regex(/^(\+353|0)[0-9\s\-]{7,14}$/, "Please enter a valid Irish phone number (e.g., 0871234567 or +353871234567)"),
   serviceType: z.enum(["daycare", "boarding", "boarding:small", "boarding:large", "trial"]),
   serviceDate: z.string().optional(),
   checkinDate: z.string().optional(),
@@ -72,7 +74,9 @@ export const insertBookingSchema = z.object({
 export const insertCustomerSchema = z.object({
   email: z.string().email("Valid email required"),
   name: z.string().min(1, "Name is required"),
-  phone: z.string().min(1, "Phone number is required"),
+  phone: z.string()
+    .min(1, "Phone number is required")
+    .regex(/^(\+353|0)[0-9\s\-]{7,14}$/, "Please enter a valid Irish phone number (e.g., 0871234567 or +353871234567)"),
   firebaseUid: z.string().optional(),
   isFirstTime: z.boolean().default(true),
 });
