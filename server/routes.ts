@@ -11,10 +11,10 @@ import { admin } from "./firebase-admin";
 
 // Use Firestore from admin
 const adminDb = admin.firestore();
-import { 
-  EnhancedFirebaseDog, 
-  Vaccination, 
-  HealthProfile, 
+import {
+  EnhancedFirebaseDog,
+  Vaccination,
+  HealthProfile,
   KennelSettings,
   COLLECTIONS,
   createInsertVaccinationSchema,
@@ -30,6 +30,22 @@ import { users, dogs, vaccinations, healthProfiles, settings } from "./db/schema
 import { eq, desc } from "drizzle-orm";
 import { ensureTenant } from "./services/userService";
 
+// Modular routers (also mounted in server/index.ts for local dev)
+import dogsRouter from "./routes/dogs";
+import adminDogsRouter from "./routes/adminDogs";
+import bookingRouter from "./routes/booking";
+import checkoutRouter from "./routes/checkout";
+import paymentsRouter from "./routes/payments";
+import usersRouter from "./routes/users";
+import settingsRouter from "./routes/settings";
+import remindersRouter from "./routes/reminders";
+import availabilityRouter from "./routes/availability";
+import reservationsRouter from "./routes/reservations";
+import adminSettingsRouter from "./routes/adminSettings";
+import { authBootstrap } from "./routes/authBootstrap";
+import { authRouter } from "./routes/auth";
+import { registerCloudinaryRoutes } from "./uploads/cloudinary";
+
 // Legacy Stripe initialization - Use getStripe() factory for safer initialization
 let stripe: Stripe | null = null;
 function getLegacyStripe(): Stripe {
@@ -44,6 +60,26 @@ function getLegacyStripe(): Stripe {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // ── Mount modular routers (must match server/index.ts) ──────────────
+  app.use("/api/auth", authRouter);
+  app.use(dogsRouter);
+  app.use(adminDogsRouter);
+  app.use(bookingRouter);
+  app.use("/api/checkout", checkoutRouter);
+  app.use("/api/payments", paymentsRouter);
+  app.use(usersRouter);
+  app.use(settingsRouter);
+  app.use(remindersRouter);
+  app.use("/api/availability", availabilityRouter);
+  app.use("/api/reservations", reservationsRouter);
+  app.use("/api/admin/settings", adminSettingsRouter);
+  app.use(authBootstrap);
+
+  // Register upload provider routes
+  if (process.env.UPLOADS_PROVIDER === 'cloudinary') {
+    registerCloudinaryRoutes(app);
+  }
+
   // Stripe configuration endpoint - provides publishable key to frontend
   app.get('/api/stripe/config', (req, res) => {
     const publishableKey = process.env.VITE_STRIPE_PUBLIC_KEY;
