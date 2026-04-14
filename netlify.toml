@@ -9,7 +9,7 @@
 # Proxy API requests to the Netlify Function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true
 
