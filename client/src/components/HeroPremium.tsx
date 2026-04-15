@@ -39,8 +39,13 @@ export default function HeroPremium() {
           aria-hidden="true"
         />
 
-        {/* Keep existing gradient/overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-black/10 to-black/20" />
+        {/* Cinematic gradient overlay */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(26,22,20,0.3) 0%, rgba(26,22,20,0.1) 30%, rgba(26,22,20,0.05) 50%, rgba(26,22,20,0.4) 80%, rgba(26,22,20,0.7) 100%)'
+          }}
+        />
       </div>
 
       {/* Content */}
@@ -73,10 +78,11 @@ export default function HeroPremium() {
             
             <Button
               size="lg"
-              className="font-semibold px-8 py-4 text-lg transition-all btn-primary btn-premium focus-premium"
+              variant="outline"
+              className="font-semibold px-8 py-4 text-lg transition-all border-2 border-[var(--hi-gold)] text-white bg-transparent hover:bg-[var(--hi-gold)] hover:text-white focus-premium"
               onClick={() => {
-                document.getElementById('things-to-know')?.scrollIntoView({ 
-                  behavior: 'smooth' 
+                document.getElementById('things-to-know')?.scrollIntoView({
+                  behavior: 'smooth'
                 });
               }}
               data-testid="button-things-to-know"
@@ -87,23 +93,27 @@ export default function HeroPremium() {
         </Reveal>
 
         {/* Trust indicators */}
-        <div className="mt-12 flex flex-wrap justify-center items-center gap-8 text-gray-300 feature-icons">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <div className="mt-12 flex flex-wrap justify-center items-center gap-3 sm:gap-4 text-gray-200 feature-icons">
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <svg className="w-4 h-4 text-[var(--hi-gold)]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18l-1.45-1.32C5.4 14.36 2 11.28 2 7.5 2 5.42 3.42 4 5.5 4c1.74 0 3.41.81 4.5 2.09C11.09 4.81 12.76 4 14.5 4 16.58 4 18 5.42 18 7.5c0 3.78-3.4 6.86-6.55 9.18L10 18z" clipRule="evenodd" />
             </svg>
             <span className="text-sm font-medium">Licensed & Insured</span>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-white/30" aria-hidden="true" />
+
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <svg className="w-4 h-4 text-[var(--hi-gold)]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span className="text-sm font-medium">Certified Staff</span>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-white/30" aria-hidden="true" />
+
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <svg className="w-4 h-4 text-[var(--hi-gold)]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V7l-7-5z" clipRule="evenodd" />
             </svg>
             <span className="text-sm font-medium">Safe & Secure Facility</span>

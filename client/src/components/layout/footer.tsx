@@ -9,8 +9,8 @@ export default function Footer() {
   
   return (
     <footer className="footer mt-8 sm:mt-12 md:mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 [&>*:not(:last-child)]:pb-8 sm:[&>*:not(:last-child)]:pb-0 [&>*:not(:last-child)]:border-b sm:[&>*:not(:last-child)]:border-b-0 [&>*:not(:last-child)]:border-white/10">
           <div className="md:col-span-2">
             <div className="mb-4">
               <button 
@@ -28,10 +28,16 @@ export default function Footer() {
               Premium daycare and boarding services for your beloved furry family members. 
               Licensed, insured, and dedicated to providing the best care possible.
             </p>
-            <div className="flex space-x-4">
-              <Facebook className="text-2xl cursor-pointer transition-colors duration-200" style={{ color: 'var(--hi-cream)' }} />
-              <Instagram className="text-2xl cursor-pointer transition-colors duration-200" style={{ color: 'var(--hi-cream)' }} />
-              <Twitter className="text-2xl cursor-pointer transition-colors duration-200" style={{ color: 'var(--hi-cream)' }} />
+            <div className="flex space-x-3">
+              <a href="#" aria-label="Facebook" className="social-icon-pill">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="#" aria-label="Instagram" className="social-icon-pill">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="#" aria-label="Twitter" className="social-icon-pill">
+                <Twitter className="w-4 h-4" />
+              </a>
             </div>
           </div>
           
@@ -64,7 +70,7 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="border-t mt-6 sm:mt-8 pt-4 sm:pt-6 pb-4 sm:pb-6" style={{ borderColor: 'var(--hi-border)', color: 'var(--hi-cream)' }}>
+        <div className="border-t mt-8 sm:mt-10 pt-6 sm:pt-8 pb-4 sm:pb-6" style={{ borderColor: 'rgba(250,248,244,0.15)', color: 'var(--hi-cream)' }}>
           <div className="flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm">
             <p className="mb-2 sm:mb-0">&copy; 2025 The Howliday Inn. All rights reserved.</p>
             <div className="flex items-center space-x-4">
